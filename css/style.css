@@ -1,0 +1,18 @@
+/*Temp CSS*/
+#mainHeader{
+    text-align: center;
+    font-size: 5vw;
+}
+    
+
+body{
+    background-color: darkslategray;
+    color: lightgrey;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+
+button{
+    background-color: lightgrey;
+    color: darkslategray;
+    border-radius: 10px;
+}
