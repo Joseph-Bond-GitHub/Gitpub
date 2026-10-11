@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Week 1-2 Focused Revision Paper</title><style>@page{size:A4;margin:16mm 16mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#18263a;max-width:860px;margin:30px auto;padding:0 25px;font-size:13px;line-height:1.4}h1{font-size:25px;margin-bottom:4px}h2{font-size:18px;border-bottom:2px solid #1e3f61;padding-bottom:5px;margin:27px 0 8px}.muted{color:#596779}.meta{padding:11px 14px;background:#eff4f8;border-radius:6px;margin:15px 0 20px}.q{break-inside:avoid;page-break-inside:avoid;margin:16px 0 19px}.qtitle{font-weight:700;margin-bottom:7px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}.opt{display:flex;gap:8px;align-items:flex-start}.bubble{border:1.4px solid #52657a;border-radius:50%;height:13px;width:13px;flex:0 0 13px;margin-top:2px}.write{height:120px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,#cbd4df 28px,#cbd4df 29px);margin-top:9px}.write.tall{height:195px}pre{white-space:pre-wrap;background:#f2f5f8;padding:12px;border:1px solid #dce3ea;line-height:1.5}.section-start{break-before:page;page-break-before:always}.foot{color:#677382;font-size:11px;margin-top:30px}@media print{body{max-width:none;padding:0;margin:0;font-size:11.5px}.meta{-webkit-print-color-adjust:exact;print-color-adjust:exact}.q{margin:12px 0 16px}.write{height:110px}.write.tall{height:175px}}</style></head><body>
+<h1>Databases &amp; Web Programming</h1><div class="muted">Weeks 1–2 · Focused Revision Paper · Difficult Questions</div>
+<div class="meta"><strong>20 questions · 35 marks · 35–45 minutes</strong><br>15 multiple-choice questions (1 mark each) + 5 written/code questions (20 marks).<br><small>Based on the Week 1 and Week 2 lecture material only. No answers are printed on this paper.</small></div>
+<p>Name: ____________________________ &nbsp; Date: __________________</p>
+<p><b>Instructions:</b> Circle one answer per multiple-choice question. Write your answers to the later questions in the space provided. Show dependencies and key fields clearly. No notes if attempting under exam conditions.</p>
+<h2>Part A — Multiple Choice (15 marks)</h2>
+<section class="q"><div class="qtitle">1. In Enrolment(StudentID, ModuleID), neither column is individually unique, but each pair is unique. What is the most appropriate primary key? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> StudentID</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> ModuleID</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> (StudentID, ModuleID)</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> StudentName</span></div>
+</div></section>
+<section class="q"><div class="qtitle">2. Given StudentID -&gt; StudentName, what does this dependency guarantee? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Every student has a different name</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> Rows with the same StudentID have the same StudentName</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> StudentName uniquely determines StudentID</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> StudentName cannot be NULL</span></div>
+</div></section>
+<section class="q"><div class="qtitle">3. Enrolment(StudentID, ModuleID, StudentName) has composite PK (StudentID, ModuleID). StudentName depends only on StudentID. Which issue is present? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Transitive dependency</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> No issue because there is a PK</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Violation of 1NF only</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Partial dependency</span></div>
+</div></section>
+<section class="q"><div class="qtitle">4. Student(StudentID, Postcode, City) has StudentID -&gt; Postcode and Postcode -&gt; City, assuming each postcode specifies a city. Which is the relevant issue? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Transitive dependency</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> Composite primary key</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Many-to-many relationship</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Repeating attribute</span></div>
+</div></section>
+<section class="q"><div class="qtitle">5. Which is the best correction to a partial dependency in Enrolment(StudentID, ModuleID, StudentName)? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Add more StudentName columns</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> Remove ModuleID from every table</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Move StudentName into Student(StudentID, StudentName) and retain enrolment pairs</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Replace the PK with StudentName</span></div>
+</div></section>
+<section class="q"><div class="qtitle">6. If a table is in 1NF and its primary key has one column, which statement best matches the Week 2 lecture? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> It automatically satisfies 3NF</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> There can be no partial dependency on part of a composite primary key</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> It cannot have foreign keys</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> It must have an UPDATE anomaly</span></div>
+</div></section>
+<section class="q"><div class="qtitle">7. A lecturer teaches many modules, and each module has one lecturer. Which table normally stores lecturer_id as a foreign key? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Lecturer</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> A mandatory many-to-many join table</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Student</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Module</span></div>
+</div></section>
+<section class="q"><div class="qtitle">8. A student may take multiple modules; a module may have multiple students. Which relational design avoids a repeating list of module IDs in a Student cell? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Enrolment junction table with StudentID and ModuleID</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> One column called Modules containing comma-separated IDs</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> A column per possible module</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Only a Module table</span></div>
+</div></section>
+<section class="q"><div class="qtitle">9. A Student table stores DepartmentID and DepartmentName. DepartmentID determines DepartmentName. Assuming StudentID is PK, this is most directly tested by: <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> 1NF atomicity</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> 2NF partial dependencies</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> 3NF transitive dependencies</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> psql commands</span></div>
+</div></section>
+<section class="q"><div class="qtitle">10. What does DELETE FROM Student; do if it succeeds? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Removes the table definition</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> Removes all rows but preserves the table structure</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Removes the first row</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Removes rows only when the PK is NULL</span></div>
+</div></section>
+<section class="q"><div class="qtitle">11. Which command correctly modifies only StudentID 7, assuming the column is student_id? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> UPDATE Student WHERE student_id=7 SET name=&#x27;Amira&#x27;;</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> INSERT INTO Student SET name=&#x27;Amira&#x27; WHERE student_id=7;</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> SELECT name=&#x27;Amira&#x27; FROM Student WHERE student_id=7;</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> UPDATE Student SET name=&#x27;Amira&#x27; WHERE student_id=7;</span></div>
+</div></section>
+<section class="q"><div class="qtitle">12. Which of these is a psql meta-command rather than SQL? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> \c university</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> CREATE TABLE Student (id INTEGER);</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> SELECT * FROM Student;</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> GRANT SELECT ON Student TO reader;</span></div>
+</div></section>
+<section class="q"><div class="qtitle">13. Which JDL declaration matches a mandatory, non-duplicated email field? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> email TEXT NOT NULL UNIQUE</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> required unique email String</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> email String required unique</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> email required String unique</span></div>
+</div></section>
+<section class="q"><div class="qtitle">14. In relationship OneToMany { Lecturer{modules} to Module{lecturer} }, which navigation is available? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> Only module.getModules()</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> lecturer.getModules() and module.getLecturer()</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> Only lecturer.getLecturer()</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> Neither side has navigation</span></div>
+</div></section>
+<section class="q"><div class="qtitle">15. JDL defines relationship ManyToMany { Student{modules} to Module{students} }. What does JHipster normally create in a relational database? <span class="muted">[1]</span></div><div class="answers">
+<div class="opt"><span class="bubble"></span><span><b>A.</b> One column with a list in Student</span></div>
+<div class="opt"><span class="bubble"></span><span><b>B.</b> A separate database for each student</span></div>
+<div class="opt"><span class="bubble"></span><span><b>C.</b> A direct FK in Student that can store several values</span></div>
+<div class="opt"><span class="bubble"></span><span><b>D.</b> A junction table referencing both entities</span></div>
+</div></section>
+<h2 class="section-start">Part B — Written and Code Reasoning (20 marks)</h2>
+<section class="q"><div class="qtitle">16. Explain in your own words what A -&gt; B means in a functional dependency. Use StudentID and StudentName, and explain why the reverse direction need not be true. <span class="muted">[4 marks]</span></div><div class="write "></div></section>
+<section class="q"><div class="qtitle">17. Use this table: Enrolment(StudentID, ModuleID, StudentName, ModuleTitle), with composite PK (StudentID, ModuleID). Identify TWO partial dependencies and propose a 2NF decomposition into tables. <span class="muted">[5 marks]</span></div><div class="write tall"></div></section>
+<section class="q"><div class="qtitle">18. Student(StudentID, Postcode, City) has the dependencies StudentID -&gt; Postcode and Postcode -&gt; City. Explain how this creates a transitive dependency and show a sensible 3NF decomposition. <span class="muted">[5 marks]</span></div><div class="write tall"></div></section>
+<section class="q"><div class="qtitle">19. The intention is to delete only the student with student_id 7. Explain what is dangerous about DELETE FROM Student; and write the corrected SQL statement. <span class="muted">[3 marks]</span></div><div class="write "></div></section>
+<section class="q"><div class="qtitle">20. Write JDL for Student(name String required) and Module(title String required) with a bidirectional ManyToMany relationship. Then state what relational table is normally generated to represent it. <span class="muted">[3 marks]</span></div><div class="write tall"></div></section>
+<div class="foot">Revision focus: functional dependencies; composite primary keys; 2NF/3NF; SQL UPDATE/DELETE; JDL relations. End of paper.</div></body></html>
