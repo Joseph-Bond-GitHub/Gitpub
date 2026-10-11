@@ -1,0 +1,543 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Databases · Week 1 practice</title><style>
+:root{
+ --bg:#f7f5f0;--card:#ffffff;--ink:#1d1f24;--muted:#5d6370;--line:#e2ddd2;
+ --accent:#2f5d8a;--accent-soft:#e6eef7;--good:#2e7d4f;--good-soft:#e5f3ea;
+ --warn:#9a5b00;--warn-soft:#fbf0dc;--code-bg:#f1efe9;--code-ink:#2a2d33;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+}
+:root[data-theme="dark"]{
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+header h1{font-family:Georgia,"Iowan Old Style",serif;font-weight:600;font-size:2rem;line-height:1.2;margin:0 0 6px}
+header .sub{color:var(--muted);margin:0 0 18px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+ padding:10px 0;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);cursor:pointer}
+.bar button:hover{border-color:var(--accent)}
+.bar .prog{margin-left:auto;color:var(--muted);font-size:.9rem}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+.intro p:first-child{margin-top:0}.intro p:last-child{margin-bottom:0}
+h2.sec{font-family:Georgia,serif;font-weight:600;font-size:1.35rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+.q.done{border-left:4px solid var(--good)}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qnum{font-weight:700;color:var(--accent)}
+.tag{font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.tag.marks{background:var(--code-bg);color:var(--muted)}
+.tick{margin-left:auto;font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+details{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";}details[open] summary::before{content:"▾ ";}
+.ans{margin-top:8px}
+pre,code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.88rem}
+code{background:var(--code-bg);color:var(--code-ink);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);color:var(--code-ink);padding:12px 14px;border-radius:8px;overflow-x:auto;line-height:1.45}
+pre code{background:none;padding:0}
+.out{border-left:3px solid var(--good)}
+.err{border-left:3px solid var(--warn)}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 2px}
+.note{background:var(--warn-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+.note b:first-child{color:var(--warn)}
+.tip{background:var(--good-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+table.t{border-collapse:collapse;margin:8px 0;font-size:.9rem;display:block;overflow-x:auto}
+table.t th,table.t td{border:1px solid var(--line);padding:4px 10px;text-align:left;white-space:nowrap}
+table.t th{background:var(--code-bg)}
+.copy{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+ol li,ul li{margin:3px 0}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{font:inherit;text-align:left;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt[disabled]{cursor:default}
+.opt b{color:var(--muted);margin-right:6px}
+.tag.mcq{background:var(--good-soft);color:var(--good)}
+@media print{.bar,.tick,.copy{display:none}details{display:block}details>*{display:block}}
+</style></head><body><div class="wrap">
+<header><h1>Databases · Week 1 practice</h1><p class="sub">Introduction to databases, design guidelines, ER modelling and JDL</p></header>
+<div class="bar"><button onclick="setAll(true)">Reveal written answers</button>
+<button onclick="setAll(false)">Hide all</button><button onclick="resetTicks()">Reset ticks</button>
+<span class="prog"></span></div>
+<div class="intro"><p>Practice for <b>Week 1</b> of LI Databases &amp; Web Programming: databases and DBMSs, data models and schemas,
+the relational model, redundancy, the catalog, views, transactions and ACID, constraints, the four informal design
+guidelines, ER modelling, and JDL. Questions follow the lecture slides' own definitions and examples. A few are tagged
+<span class="tag">beyond slides</span> where they stretch slightly further.</p>
+<p>Multiple-choice questions (the format your 20-minute in-class test is likely to use) check themselves when you click.
+For written questions, answer on paper first, then open the answer. Tick <b>confident</b> once you could do it cold;
+ticks are remembered in this browser.</p>
+<div class="note"><b>Convention check.</b> The slides use two ER styles: <b>Chen-style</b> (rectangles, ellipses, diamonds;
+slides 53–60) and <b>table-style boxes with crow's-foot lines</b> (slide 62), and they write cardinalities as
+<b>1:1, 1:M, M:M</b>. Some textbooks write 1:N and M:N; same meaning. JDL Studio diagrams instead label ends with
+(0..1), (1..*) and so on. Match whichever style a question uses.</div></div>
+<h2 class="sec">A. Databases and DBMSs</h2><div class="q" id="q1">
+<div class="qhead"><span class="qnum">Q1</span><span class="tag mcq">multiple choice</span><span class="tag">definitions</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Which is the Ramakrishnan &amp; Gehrke definition of a <b>database</b>, as quoted in the lecture?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Software designed to assist in maintaining and utilising large collections of data</button><button class="opt" data-i="1" onclick="pick(this)">A collection of data, typically describing the activities of one or more related organisations</button><button class="opt" data-i="2" onclick="pick(this)">A set of tuples and attributes stored on disk</button><button class="opt" data-i="3" onclick="pick(this)">A blueprint that defines how data is organised, stored and manipulated</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> the correct one is “a collection of data, typically describing the activities of one or more related organisations”. Of the others, “software designed to assist…” defines a <b>DBMS</b> (the software, e.g. PostgreSQL), “a set of tuples and attributes” is roughly a <b>table/relation</b>,
+and “a blueprint…” is a <b>data model</b>. The distinction the slides draw: the <i>database</i> is the data; the <i>DBMS</i> is the
+software that manages it. pgAdmin is neither: it's a client program that talks to the DBMS.</p></div></details>
+</div><div class="q" id="q2">
+<div class="qhead"><span class="qnum">Q2</span><span class="tag">types of database</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture names three types of database. For each, say <b>how the data is stored</b>, give <b>one example
+system</b> from the slides, and name its <b>query language</b>.</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th>Type</th><th>Data stored as</th><th>Examples (slides)</th><th>Query language</th></tr>
+<tr><td>Relational</td><td>Tables (relations: rows and columns)</td><td>PostgreSQL, MySQL, MariaDB</td><td>SQL</td></tr>
+<tr><td>Graph</td><td>Nodes and the relationships (edges) between them</td><td>Neo4j, GraphDB, RDFox</td><td>Cypher, SPARQL</td></tr>
+<tr><td>Vector</td><td>High-dimensional vectors (lists of numbers)</td><td>(none named; not assessed, week 6)</td><td>similarity search</td></tr></table>
+<p>The graph model returns in Week 5 with Neo4j/Cypher. The slide's Table vs Graph example shows the same student data both ways:
+in the table, “Module Lead: Madasah Shah” is repeated on every row; in the graph, it's one <code>Module</code> node with one
+<code>hasLead</code> edge, and every student just has an <code>isEnrolledIn</code> edge to it.</p></div></details>
+</div><div class="q" id="q3">
+<div class="qhead"><span class="qnum">Q3</span><span class="tag">why DBMS</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>A small climbing wall keeps member details in one Excel file, session bookings in another, and payments in a
+handwritten ledger. Using the <b>four reasons from the lecture</b> for needing a DBMS, describe one concrete problem
+for each and how a DBMS fixes it.</p></div>
+<details><summary>Show answer</summary><div class="ans"><ol>
+<li><b>Data organisation and management.</b> <i>Without:</i> scattered, partly unstructured files; finding one member's
+full history means searching three places by hand. <i>With:</i> a defined <b>schema</b> (tables with set columns) makes storage
+and retrieval systematic: one query answers it.</li>
+<li><b>Reduced redundancy and inconsistency.</b> <i>Without:</i> a member's phone number sits in all three records; update one,
+forget another, and the data now contradicts itself. <i>With:</i> stored once, centrally, and linked by a member ID.</li>
+<li><b>Concurrent (multi-user) access.</b> <i>Without:</i> two receptionists edit the bookings file at once and one save overwrites
+the other. <i>With:</i> <b>concurrency control</b> lets many users read and write simultaneously without conflicts.</li>
+<li><b>Data integrity and accuracy.</b> <i>Without:</i> nothing stops a duplicate member ID or a negative payment. <i>With:</i>
+<b>constraints</b>, validation rules and data types enforce rules like “member ID must be unique”.</li></ol>
+<div class="tip">Graph link: concurrency here is the same problem as race conditions in Operating Systems. A DBMS
+<b>transaction</b> (later this page) is its answer, the database-sized version of a lock-protected critical section.</div></div></details>
+</div><div class="q" id="q4">
+<div class="qhead"><span class="qnum">Q4</span><span class="tag mcq">multiple choice</span><span class="tag">DBMS tasks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture lists seven major DBMS tasks. Which one is “protecting against unauthorised or malicious access”?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Protecting the database</button><button class="opt" data-i="1" onclick="pick(this)">Securing the database</button><button class="opt" data-i="2" onclick="pick(this)">Maintaining the database</button><button class="opt" data-i="3" onclick="pick(this)">Sharing the database</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: Securing.</b> The easy-to-mix pair: <b>Protecting</b> = against <i>software or hardware malfunction</i>
+(crashes, disk failure); <b>Securing</b> = against <i>unauthorised or malicious access</i>. The full seven:
+<b>Defining</b> (encoding the structure and constraints), <b>Constructing</b> (storing the data on a medium the DBMS controls),
+<b>Manipulating</b> (updating, querying, aggregating), <b>Sharing</b> (concurrent or sequential access by many users and apps),
+<b>Protecting</b>, <b>Securing</b>, <b>Maintaining</b> (evolving the database over its lifecycle).</p></div></details>
+</div><div class="q" id="q5">
+<div class="qhead"><span class="qnum">Q5</span><span class="tag mcq">multiple choice</span><span class="tag">DBMS tasks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Writing <code>CREATE TABLE … (room_id text NOT NULL, …, PRIMARY KEY (room_id))</code> is an example of which DBMS task?</p></div><div class="opts" data-c="0"><button class="opt" data-i="0" onclick="pick(this)">Defining the database</button><button class="opt" data-i="1" onclick="pick(this)">Constructing the database</button><button class="opt" data-i="2" onclick="pick(this)">Manipulating the database</button><button class="opt" data-i="3" onclick="pick(this)">Maintaining the database</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: Defining:</b> encoding the database <i>structure and constraints</i>. Inserting the rows afterwards would be
+<b>Constructing</b> (storing the data); <code>SELECT</code>/<code>UPDATE</code> would be <b>Manipulating</b>.</p></div></details>
+</div><div class="q" id="q6">
+<div class="qhead"><span class="qnum">Q6</span><span class="tag mcq">multiple choice</span><span class="tag">when not to use a DBMS</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>According to the lecture, in which case is a DBMS most likely <b>not</b> worth it?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">An online shop with thousands of concurrent customers</button><button class="opt" data-i="1" onclick="pick(this)">A personal shopping list on your phone</button><button class="opt" data-i="2" onclick="pick(this)">A university's student records system</button><button class="opt" data-i="3" onclick="pick(this)">A bank's account ledger</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> The slides give three cases where a DBMS may not pay off: <b>very small/simple data</b> (to-do lists, notes,
+where the overhead outweighs the benefit), <b>highly unstructured or rapidly changing schemas</b> (a relational schema is too rigid),
+and sometimes <b>purely archival / bulk read-only</b> data (optimised file formats or distributed file systems can be more efficient).</p></div></details>
+</div><div class="q" id="q7">
+<div class="qhead"><span class="qnum">Q7</span><span class="tag mcq">multiple choice</span><span class="tag">history</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Who proposed the <b>relational data model</b>, and when?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Charles Bachman, 1960</button><button class="opt" data-i="1" onclick="pick(this)">Edgar F. Codd, 1970</button><button class="opt" data-i="2" onclick="pick(this)">IBM's IMS, 1980</button><button class="opt" data-i="3" onclick="pick(this)">Ramakrishnan &amp; Gehrke, 2003</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: Edgar F. Codd (IBM), 1970.</b> The slide's timeline: IBM's Information Management System (IMS), 1960, widely used;
+Bachman's first general-purpose DBMS at General Electric (the slide dates it 1970; most sources say early 1960s, I'd go with the slide
+in the test); Codd's relational model, 1970; through the 1980s the relational model spreads and <b>SQL</b> becomes the standard.
+Codd also introduced normalisation (Week 2).</p></div></details>
+</div><h2 class="sec">B. Data models, the relational model and DBMS features</h2><div class="q" id="q8">
+<div class="qhead"><span class="qnum">Q8</span><span class="tag">data model</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>What is a <b>data model</b>, and what are its three purposes according to the lecture?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p>A <b>data model</b> is a blueprint that defines how a database organises, stores and manipulates data, while hiding
+low-level details such as how bytes are laid out on disk. Its three purposes:</p>
+<ul><li><b>Abstraction:</b> hides physical storage so you can focus on the logical structure.</li>
+<li><b>Organisation &amp; storage:</b> defines how data elements relate (tables, keys, fields).</li>
+<li><b>Operations:</b> specifies the rules and commands to query, insert, update and delete.</li></ul>
+<p>The course focuses on the <b>relational</b> data model. The graph model (Week 5) is a different data model for the same job.</p></div></details>
+</div><div class="q" id="q9">
+<div class="qhead"><span class="qnum">Q9</span><span class="tag mcq">multiple choice</span><span class="tag">schema</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Which best describes a <b>schema</b>?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">The rows currently stored in the database</button><button class="opt" data-i="1" onclick="pick(this)">A description of the data (metadata): structure, data types, constraints</button><button class="opt" data-i="2" onclick="pick(this)">A backup copy of the database</button><button class="opt" data-i="3" onclick="pick(this)">The physical files the DBMS writes to disk</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> The slide's key line: <b>the schema is NOT the data</b>, only a description of it, i.e. <b>metadata</b>.
+In the movies example, <code>ACTOR(Name, Surname)</code>, <code>DIRECTOR(Name, Surname)</code>,
+<code>MOVIE(Title, Genre, Director, Leading actor)</code> is the schema; “Steven Spielberg” or “Citizen Kane” would be data.
+(Week 2 adds a second meaning: a PostgreSQL <i>schema</i> such as <code>public</code> is a named container of tables inside one database.)</p></div></details>
+</div><div class="q" id="q10">
+<div class="qhead"><span class="qnum">Q10</span><span class="tag">relational model</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture's ACTOR table:</p>
+<table class="t"><tr><th>Surname</th><th>Name</th><th>Age</th></tr><tr><td>Atkinson</td><td>Rowan</td><td>66</td></tr>
+<tr><td>Bloom</td><td>Orlando</td><td>44</td></tr><tr><td>Zeta-Jones</td><td>Catherine</td><td>51</td></tr></table>
+<p>(a) Complete: each <i>table</i> represents a ___; each <i>column</i> represents a ___ (informally an ___);
+each <i>row</i> represents an ___ or ___ (informally a ___).<br>(b) How many attributes and how many tuples does it have?
+(c) The <b>CARS</b> and <b>CROPS</b> tables are both relations but the slide calls this a database of “not related information”. What makes
+the Actors/Directors/Movies database “related” instead?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> table → <b>relation</b>; column → <b>domain</b> (informally an <b>attribute</b>); row → <b>association</b>,
+case or <b>tuple</b> (informally a <b>record</b>). A <b>relational database</b> is a collection of <i>n</i>-ary relations stored as tables;
+<i>n</i>-ary means each relation links <i>n</i> values.</p>
+<p><b>(b)</b> 3 attributes (Surname, Name, Age), 3 tuples.</p>
+<p><b>(c)</b> Attributes that <b>link</b> the tables: Movies' <code>DirectorSurname</code> and <code>LeadingActorSurname</code> repeat values from
+Directors and Actors, so you can navigate from a movie to its director. CARS and CROPS share nothing, so there's no way to move between them.
+Those linking attributes become <b>foreign keys</b> in Week 2.</p></div></details>
+</div><div class="q" id="q11">
+<div class="qhead"><span class="qnum">Q11</span><span class="tag">redundancy</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Define <b>redundancy</b>. (b) Give the three causes from the lecture. (c) Why is it generally undesirable?
+(d) What is <b>controlled redundancy</b>, and when is it useful?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> Storing the same information more than once.</p>
+<p><b>(b)</b> Repeating data (the same data in multiple places); storing <b>derived attributes</b> (they add no new data, a form of
+aggregation, but can be handy); adding <b>checksums</b>.</p>
+<p><b>(c)</b> Storage is inefficient (memory wasted) and management is error-prone: you must update several entries, so you're exposed to
+<b>inconsistencies</b>.</p>
+<p><b>(d)</b> Redundancy you add <i>deliberately</i> because it pays for itself: to protect against attacks/corruption (checksums),
+to save time when derived attributes are expensive to compute, and to improve query performance. Example: storing an order's
+<code>total</code> rather than summing its lines every time it's displayed.</p></div></details>
+</div><div class="q" id="q12">
+<div class="qhead"><span class="qnum">Q12</span><span class="tag">design steps</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Put the six high-level database design steps in order, and say in which step each happens:
+(i) choosing PostgreSQL vs Neo4j; (ii) drawing the ER diagram; (iii) interviewing staff about what they need to store;
+(iv) normalising tables to remove redundancy; (v) setting up user roles and permissions.</p></div>
+<details><summary>Show answer</summary><div class="ans"><ol><li><b>Requirements analysis</b>: what to store? → (iii)</li>
+<li><b>Conceptual design</b>: high-level blueprint → (ii), the ER model</li>
+<li><b>Logical design</b>: data strategy, DBMS selection → (i)</li>
+<li><b>Schema refinement</b>: optimisation and integrity → (iv), normalisation (Week 2)</li>
+<li><b>Physical design</b>: hardware and storage tuning (indexes, disks)</li>
+<li><b>Application integration &amp; security</b>: access and governance → (v)</li></ol></div></details>
+</div><div class="q" id="q13">
+<div class="qhead"><span class="qnum">Q13</span><span class="tag">catalog</span><span class="tag">views</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) What is the <b>DBMS catalog</b>, and what's odd about it?<br>
+(b) Define a <b>view</b>. Is a view's content normally stored?<br>
+(c) In the lecture's flights database, there's no table linking a baggage allowance to a booking. Explain how a view solves this.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> A directory of information (metadata) about the data sets, files and databases managed by the DBMS: table names, column
+types, constraints, owners. The odd part: <b>the catalog is itself a database</b>, and managing it is complicated enough that some
+DBMSs have dedicated catalog managers. (psql's <code>\dt</code> and <code>\d</code> are queries against PostgreSQL's catalog.)</p>
+<p><b>(b)</b> An access to a subset of the information in the database; in practice a <b>virtual table</b> built from the <b>base tables</b>.
+Its content is <b>often not stored permanently</b> but computed on the fly; it can show data stored in base tables and/or data derived from them.</p>
+<p><b>(c)</b> From a booking's flight number you know the airline and the departure/destination countries, which is enough to look up
+the default allowance. A view such as <code>FlightAllowance(FlightNumber, NumHandbags, SizeHandbags, NumCheckedBags, MaxWeight)</code>
+works this out whenever it's queried, without storing a redundant allowance on every booking. (You'll write
+<code>CREATE VIEW</code> on the SQL page.)</p></div></details>
+</div><div class="q" id="q14">
+<div class="qhead"><span class="qnum">Q14</span><span class="tag">transactions</span><span class="tag">ACID</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Define a <b>unit of work</b> and a <b>transaction</b>. (b) Explain why withdrawing cash at an ATM must be a transaction.
+(c) Name and define the four <b>ACID</b> properties.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> A <b>unit of work</b> is any manipulation of the database (e.g. a collection of reads and writes) that is
+conceptually one thing. A <b>transaction</b> is a unit of work executed by a DBMS: its operations must all happen or none, otherwise the
+database can be left inconsistent.</p>
+<p><b>(b)</b> It's several steps: check credit, check daily limit, check the ATM has cash, subtract the amount, dispense. If only some
+happen (balance reduced but no cash dispensed) the data is wrong.</p>
+<p><b>(c)</b></p><ul><li><b>Atomic:</b> treated as one unit; it either works completely or fails completely.</li>
+<li><b>Consistent:</b> leaves the database correct, so an illegal transaction can't corrupt it. (It doesn't promise a transaction is
+<i>logically</i> correct; incorrect ones simply fail.)</li>
+<li><b>Isolated:</b> even when run concurrently with others, the result is as if it had run alone.</li>
+<li><b>Durable:</b> once successful, its effects survive a system failure (power cut, crash).</li></ul></div></details>
+</div><div class="q" id="q15">
+<div class="qhead"><span class="qnum">Q15</span><span class="tag mcq">multiple choice</span><span class="tag">ACID</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Two transactions run at the same time. One reads a balance halfway through the other's transfer and sees money that has left
+one account but not yet arrived in the other. Which ACID property has been broken?</p></div><div class="opts" data-c="2"><button class="opt" data-i="0" onclick="pick(this)">Atomicity</button><button class="opt" data-i="1" onclick="pick(this)">Consistency</button><button class="opt" data-i="2" onclick="pick(this)">Isolation</button><button class="opt" data-i="3" onclick="pick(this)">Durability</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: Isolation:</b> the result should be the same as if each transaction had run alone, so no one should see another's
+half-finished state. If instead the transfer itself had stopped halfway and stayed that way, that would be <b>Atomicity</b>.
+If a committed transfer vanished after a crash, <b>Durability</b>.</p></div></details>
+</div><div class="q" id="q16">
+<div class="qhead"><span class="qnum">Q16</span><span class="tag">constraints</span><span class="tag marks">7 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Match each rule to the SQL constraint the lecture lists (NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK, DEFAULT, CREATE INDEX):</p>
+<ol type="a"><li>Age must be greater than 18.</li><li>A car's plate cannot be empty.</li><li>No two members may share an email.</li>
+<li>A booking's room must be a room that exists.</li><li>New users get status “active” unless told otherwise.</li>
+<li>Each row needs an identifier that is never missing and never repeated.</li><li>Searching members by surname should be fast.</li></ol>
+<p>Then explain the slide's point about a fingerprint image as a key.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> CHECK &nbsp; <b>(b)</b> NOT NULL &nbsp; <b>(c)</b> UNIQUE &nbsp; <b>(d)</b> FOREIGN KEY (it “prevents actions that would destroy links
+between tables”) &nbsp; <b>(e)</b> DEFAULT &nbsp; <b>(f)</b> PRIMARY KEY, which the slide describes as a combination of NOT NULL and UNIQUE &nbsp;
+<b>(g)</b> CREATE INDEX (strictly a performance structure, not a rule about values).</p>
+<p>A <b>constraint</b> is a restriction on which values may be inserted into a relation. Fingerprint image: it must be unique, so it is
+<i>mathematically</i> usable as a key, but images are slow to read and compare, so it's a poor <i>practical</i> choice.
+Use a short ID and keep the image as an ordinary attribute.</p></div></details>
+</div><h2 class="sec">C. Informal design guidelines</h2><div class="q" id="q17">
+<div class="qhead"><span class="qnum">Q17</span><span class="tag">design guidelines</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>State the lecture's <b>four informal design guidelines</b>, then say which one each design breaks:</p>
+<ol type="a"><li><code>MOVIE(Title, Genre, Surname1, Surname2)</code></li>
+<li><code>FILMOGRAPHY(ActorName, ActorSurname, Title)</code> with “Orlando Bloom” on three rows</li>
+<li><code>CAR_OWNERS(PersonName, PersonSurname, CarBrand, CarModel, Plate)</code> with most cells NULL</li>
+<li>Storing <code>A(TheAttributeA)</code> and <code>B(TheAttributeB)</code> only, and rebuilding <code>C</code> by combining them</li></ol></div>
+<details><summary>Show answer</summary><div class="ans"><ol><li><b>Guideline 1:</b> attributes with <b>clear semantics</b> → (a): which surname is the director, which the actor? Fix:
+<code>DirectorSurname</code>, <code>LeadingActorSurname</code>.</li>
+<li><b>Guideline 2:</b> <b>do not repeat information</b> → (b): Bloom's name is stored per movie (update anomaly risk), and adding an
+actor with no movie forces a NULL Title, an <b>insertion anomaly</b>.</li>
+<li><b>Guideline 3:</b> avoid attributes in a base relation whose values may <b>frequently be NULL</b> → (c): you can always merge tables into
+one big one, but NULLs waste memory, blur what attributes mean, and complicate aggregation (operations have to handle NULL).
+You can always split instead (the slide splits PHONE_DIRECTORY's sparse Landline/Mobile the same way).</li>
+<li><b>Guideline 4:</b> avoid generating <b>spurious tuples</b> → (d): see the next question.</li></ol></div></details>
+</div><div class="q" id="q18">
+<div class="qhead"><span class="qnum">Q18</span><span class="tag">spurious tuples</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture's relation <code>C = {(a,1), (a,3), (b,1), (b,2)}</code> is a subset of <code>A × B</code> with A = {a, b},
+B = {1, 2, 3}.</p>
+<ol type="a"><li>How many tuples does <code>A × B</code> have, and which are spurious?</li>
+<li>New one: A = {x, y, z}, B = {1, 2}, C = {(x,1), (y,2), (z,1), (z,2)}. Repeat (a).</li>
+<li>What are the two design choices on the slides, and which is better?</li></ol></div>
+<details><summary>Show answer</summary><div class="ans"><p>A <b>spurious tuple</b> is a false row produced when tables are joined back together that wasn't in the original data.
+<code>A × B</code> (the Cartesian product) pairs every element of A with every element of B, so it has |A| × |B| rows.</p>
+<p><b>(a)</b> 2 × 3 = <b>6</b> tuples: (a,1), (a,2), (a,3), (b,1), (b,2), (b,3). C contains 4 of them, so the spurious ones are
+<b>(a,2)</b> and <b>(b,3)</b>.</p>
+<p><b>(b)</b> 3 × 2 = <b>6</b>: (x,1), (x,2), (y,1), (y,2), (z,1), (z,2). Spurious: <b>(x,2)</b> and <b>(y,1)</b>.</p>
+<p><b>(c)</b> Scenario 1: store only A and B and build C on the fly by combining them, which saves memory but produces spurious tuples you
+must filter “manually”. Scenario 2: store C explicitly as well, which costs memory but has no spurious tuples. <b>Scenario 2</b> is the
+better design. On the SQL page, <code>CROSS JOIN</code> is exactly this A × B.</p></div></details>
+</div><div class="q" id="q19">
+<div class="qhead"><span class="qnum">Q19</span><span class="tag mcq">multiple choice</span><span class="tag">anomalies</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>In FILMOGRAPHY(ActorName, ActorSurname, Title), adding Catherine Zeta-Jones before she has a movie in the database forces <code>Title = NULL</code>. What is this?</p></div><div class="opts" data-c="2"><button class="opt" data-i="0" onclick="pick(this)">Update anomaly</button><button class="opt" data-i="1" onclick="pick(this)">Deletion anomaly</button><button class="opt" data-i="2" onclick="pick(this)">Insertion anomaly</button><button class="opt" data-i="3" onclick="pick(this)">Spurious tuple</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: an insertion anomaly</b> (slide: “insertion anomaly due to adding unwanted NULL values”). Week 2 covers all three anomaly types in detail.</p></div></details>
+</div><h2 class="sec">D. ER modelling</h2><div class="q" id="q20">
+<div class="qhead"><span class="qnum">Q20</span><span class="tag mcq">multiple choice</span><span class="tag">ER notation</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>In the lecture's ER diagrams, how is a <b>multivalued</b> attribute drawn?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Dashed ellipse</button><button class="opt" data-i="1" onclick="pick(this)">Double ellipse</button><button class="opt" data-i="2" onclick="pick(this)">Underlined name in an ellipse</button><button class="opt" data-i="3" onclick="pick(this)">Diamond</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: double ellipse</b> (e.g. a researcher's <i>Department</i>). The rest of the notation: entity type = <b>rectangle</b>;
+attribute = <b>ellipse</b>; relationship = <b>diamond</b>; derived attribute = <b>dashed ellipse</b>; key attribute = <b>underlined</b> name;
+composite attribute = an ellipse with its parts attached as further ellipses.</p></div></details>
+</div><div class="q" id="q21">
+<div class="qhead"><span class="qnum">Q21</span><span class="tag">attribute types</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>From the lecture's research-funding example: “Researchers have a name (first and last), national insurance number, address
+(number, street, postcode), sex, birth date, job title, and affiliation to one or more departments. The city can be known from
+the postcode.” Classify each attribute as <b>key</b>, <b>simple</b>, <b>composite</b>, <b>multivalued</b> or <b>derived</b>, and say how it is drawn.</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th>Attribute</th><th>Type</th><th>Drawn as</th></tr>
+<tr><td>NIN</td><td>key</td><td>ellipse, name underlined</td></tr>
+<tr><td>FirstName, LastName, Sex, BirthDate, JobTitle</td><td>simple (atomic), single-valued</td><td>plain ellipse</td></tr>
+<tr><td>Address</td><td>composite: Number, Street, PostCode</td><td>ellipse with sub-ellipses</td></tr>
+<tr><td>Department</td><td>multivalued (one or more)</td><td>double ellipse</td></tr>
+<tr><td>City</td><td>derived (from PostCode)</td><td>dashed ellipse</td></tr></table>
+<p>The slide draws FirstName and LastName as two separate simple attributes. You could also model “Name” as composite; just be consistent.
+A <b>simple/atomic</b> attribute can't be divided; a <b>composite</b> one splits into parts with independent meanings.
+A <b>single-valued</b> attribute has one value per entity (one BirthDate); a <b>multivalued</b> one can have several.</p></div></details>
+</div><div class="q" id="q22">
+<div class="qhead"><span class="qnum">Q22</span><span class="tag">key attributes</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Each funding call is identified by the funding program and the year of the call. Neither alone is enough.
+(a) What are the key attribute(s) of <code>FundingCall</code>, and how are they drawn? (b) Give your own example of an entity that
+needs two attributes to be identified.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> Both <code>ProgramID</code> and <code>CallYear</code> are underlined: together they form the key, because
+<i>the combination</i> is unique (program 7 runs a call every year; 2026 has calls from many programs). The slide's general point:
+there may be more than one key attribute.</p>
+<p><b>(b)</b> e.g. an exam sitting identified by (module_code, academic_year); a seat identified by (row, seat_number) in one venue.
+In SQL this becomes a <b>composite primary key</b> <code>PRIMARY KEY (program_id, call_year)</code>. Composite keys are also where
+<b>partial dependencies</b> (Week 2's 2NF) can happen.</p></div></details>
+</div><div class="q" id="q23">
+<div class="qhead"><span class="qnum">Q23</span><span class="tag">cardinality</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Give the cardinality (1:1, 1:M or M:M) and say which table gets the foreign key, or what extra table is needed:</p>
+<ol type="a"><li>One person has one passport.</li><li>One lecturer teaches many modules; each module has one lecturer.</li>
+<li>A student takes many modules; a module has many students.</li><li>A member can complete many routes; a route can be completed by many members.</li>
+<li>A wall has many routes; each route is on one wall.</li></ol></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>Cardinality</b> = how many instances can take part in the relationship.</p>
+<table class="t"><tr><th></th><th>Cardinality</th><th>In tables</th></tr>
+<tr><td>(a)</td><td>1:1</td><td>FK on one side, e.g. <code>passport.person_id</code> (as in the slide's diagram)</td></tr>
+<tr><td>(b)</td><td>1:M</td><td><code>module.lecturer_id</code>: the FK lives on the <b>many</b> side</td></tr>
+<tr><td>(c)</td><td>M:M</td><td>a <b>junction (associative) table</b> <code>enrolment(student_id, module_id, …)</code></td></tr>
+<tr><td>(d)</td><td>M:M</td><td>junction table <code>ascent(member_id, route_id)</code></td></tr>
+<tr><td>(e)</td><td>1:M</td><td><code>route.wall_id</code></td></tr></table></div></details>
+</div><div class="q" id="q24">
+<div class="qhead"><span class="qnum">Q24</span><span class="tag">junction tables</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Using the lecture's reasoning, explain why you can't represent Student–Module (M:M) by putting a <code>module_id</code> column in
+STUDENT, nor by putting a <code>student_id</code> column in MODULE. What does the junction table do instead?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p>A single column holds <b>one value</b>, not a list.</p>
+<ul><li><b>Attempt 1, <code>module_id</code> in STUDENT:</b> fine if a student takes one module, but they take several. You'd need
+<code>module_id_1, module_id_2, …</code>, and how many? That's the repeating-group problem Week 2's 1NF forbids.</li>
+<li><b>Attempt 2, <code>student_id</code> in MODULE:</b> the same problem in reverse; a module has many students.</li></ul>
+<p>The junction table <code>ENROLMENT(student_id FK, module_id FK, enrolled_on)</code> has one row per (student, module) pair. In the
+lecture's words, it turns one hard problem (many-to-many) into two easy ones (one-to-many, twice): one student → many enrolment rows;
+one module → many enrolment rows. It's also where attributes of the relationship itself go (<code>enrolled_on</code>, a grade).</p></div></details>
+</div><div class="q" id="q25">
+<div class="qhead"><span class="qnum">Q25</span><span class="tag">full model</span><span class="tag marks">10 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p><b>Scenario.</b> A bouldering gym wants a database. Members have a full name, a unique email, a date of birth and a membership type
+(student, staff or public). The gym has several walls; each has a unique name and a height. Each wall has many routes; a route
+has a grade, a colour and the date it was set, and is on exactly one wall. Members log which routes they've completed; a member
+can complete many routes, and a route is completed by many members.</p>
+<p>(a) Identify entities, attributes (with keys) and relationships with cardinalities. (b) Turn it into tables with PKs and FKs.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b></p><pre><code>Entities
+  MEMBER (member_id, full_name, email, date_of_birth, membership_type, [age = derived])
+  WALL   (wall_id, name, height_metres)
+  ROUTE  (route_id, grade, colour, set_on)
+
+Relationships
+  WALL  —has—        ROUTE    1:M
+  MEMBER —completes— ROUTE    M:M</code></pre>
+<p>Keys: the scenario gives none for member or route, so introduce surrogate IDs (<code>member_id</code>, <code>route_id</code>),
+the same move the Week 2 slides make with StudentID. <code>email</code> and wall <code>name</code> are unique too.
+Age would be <b>derived</b> from date of birth, so don't store it.</p>
+<p><b>(b)</b></p><pre><code>member (member_id PK, full_name, email UNIQUE, date_of_birth, membership_type)
+wall   (wall_id PK, name UNIQUE, height_metres)
+route  (route_id PK, grade, colour, set_on, wall_id FK → wall)        -- 1:M, FK on the many side
+ascent (member_id FK → member, route_id FK → route, completed_on,     -- M:M junction table
+        PRIMARY KEY (member_id, route_id))</code></pre>
+<p>Where should a completion date go? It belongs to the <i>pair</i> (this member, this route), so it can only live in the junction table.
+Q28 and Q30 write this same model in JDL.</p></div></details>
+</div><h2 class="sec">E. JDL (JHipster Domain Language)</h2><div class="q" id="q26">
+<div class="qhead"><span class="qnum">Q26</span><span class="tag mcq">multiple choice</span><span class="tag">JDL</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>What is <b>JDL</b>?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">A database management system made by JHipster</button><button class="opt" data-i="1" onclick="pick(this)">A domain-specific, text-based language for describing an application's entities and relationships, which JHipster uses to generate an app</button><button class="opt" data-i="2" onclick="pick(this)">A replacement for SQL that runs inside PostgreSQL</button><button class="opt" data-i="3" onclick="pick(this)">A diagramming tool like draw.io</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> JDL = <b>JHipster Domain Language</b>. You describe entities (like a Java/UML class with attributes but no operations)
+and relationships as text; <b>JHipster</b> (a web application stack generator, run with the <code>jhipster</code> CLI) generates the database
+tables, backend, APIs and basic frontend from it. Reasons the slides give for JDL: text-based, easy to modify, version-control friendly,
+less ambiguous than hand-drawn diagrams, generates code, integrates with JHipster. It bridges the gap between an ER diagram (data only) and a
+real app (behaviour, APIs, services, frontend). Try it at JDL Studio.</p></div></details>
+</div><div class="q" id="q27">
+<div class="qhead"><span class="qnum">Q27</span><span class="tag">JDL types</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Choose the JDL type for each field: (a) a product price in pounds and pence; (b) a date of birth; (c) a member's long bio;
+(d) a profile photo; (e) whether a member is active; (f) a moment a payment happened; (g) a stock count; (h) a globally unique ID.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> <code>BigDecimal</code>, exact decimals; never <code>Float</code>/<code>Double</code> for money, which can't store 0.10 exactly
+(the same reason you'd use <code>BigDecimal</code> for money in Java).
+<b>(b)</b> <code>LocalDate</code>, a date without time zone.
+<b>(c)</b> <code>TextBlob</code>, a large block of text.
+<b>(d)</b> <code>ImageBlob</code>.
+<b>(e)</b> <code>Boolean</code>.
+<b>(f)</b> <code>Instant</code>, a moment in time (or <code>ZonedDateTime</code> if the time zone matters).
+<b>(g)</b> <code>Integer</code> (<code>Long</code> for huge counts).
+<b>(h)</b> <code>UUID</code>.</p>
+<p>Types are capitalised class-like names. The real parser rejects <code>int</code> or <code>string</code>: type names must start with a capital letter.</p></div></details>
+</div><div class="q" id="q28">
+<div class="qhead"><span class="qnum">Q28</span><span class="tag">JDL entities</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Write JDL for the gym's <code>Member</code> and <code>Wall</code> entities from Q25, using the lecture's validations:
+full name required and at most 60 characters; email required and unique; date of birth optional; membership type required, one of
+STUDENT, STAFF, PUBLIC (use an enum); wall name required and unique; height between 3 and 20 metres.</p></div>
+<details><summary>Show answer</summary><div class="ans"><pre><code>enum MembershipType {
+  STUDENT, STAFF, PUBLIC
+}
+
+entity Member {
+  fullName String required maxlength(60),
+  email String required unique,
+  dateOfBirth LocalDate,
+  membershipType MembershipType required
+}
+
+entity Wall {
+  name String required unique,
+  heightMetres Float min(3) max(20)
+}</code></pre><p>Each field is <code>fieldName Type [validations]</code>. Modifiers from the slides: <code>required</code> (can't be null/empty),
+<code>unique</code>, <code>minlength(n)</code>/<code>maxlength(m)</code> for strings, <code>min(x)</code>/<code>max(y)</code> for numbers.
+An <b>enum</b> is a fixed set of named values, used as a field's type. No id field: JHipster adds <code>id Long</code> automatically
+(shown as “id : Long (PK)” in JDL Studio). I parsed this with the JHipster JDL parser to check the syntax (it also confirmed the commas between
+fields are optional, as on slide 67).</p></div></details>
+</div><div class="q" id="q29">
+<div class="qhead"><span class="qnum">Q29</span><span class="tag mcq">multiple choice</span><span class="tag">JDL</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>A researcher can belong to several departments (a multivalued attribute). How does the lecture say to model this in JDL?</p></div><div class="opts" data-c="2"><button class="opt" data-i="0" onclick="pick(this)">Declare the field as List&lt;String&gt;</button><button class="opt" data-i="1" onclick="pick(this)">Declare the field as Set&lt;String&gt;</button><button class="opt" data-i="2" onclick="pick(this)">Make the values a separate entity and link it with a relationship</button><button class="opt" data-i="3" onclick="pick(this)">Store them comma-separated in one String</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> JDL has no <code>List</code> or <code>Set</code> field types: “use relationship instead”, e.g. a <code>Department</code> entity
+and <code>relationship ManyToMany { Researcher{departments} to Department{researchers} }</code>. Storing them comma-separated in one String “works” but breaks 1NF (Week 2): one cell
+holding several values.</p></div></details>
+</div><div class="q" id="q30">
+<div class="qhead"><span class="qnum">Q30</span><span class="tag">JDL relationships</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Write the JDL relationships for the gym: Wall–Route (1:M) and Member–Route completions (M:M), both <b>bidirectional</b>.
+(b) For each, say which Java getter methods are generated, what they return, and what the database gets.</p></div>
+<details><summary>Show answer</summary><div class="ans"><pre><code>relationship OneToMany {
+  Wall{routes} to Route{wall}
+}
+
+relationship ManyToMany {
+  Member{completedRoutes} to Route{completedBy}
+}</code></pre><p>Syntax: <code>relationship TYPE { EntityA{fieldOnA} to EntityB{fieldOnB} }</code>. The name in <code>{}</code> is the field
+generated on that side.</p>
+<table class="t"><tr><th>Relationship</th><th>Getters</th><th>Database</th></tr>
+<tr><td>OneToMany</td><td><code>wall.getRoutes()</code> → a collection; <code>route.getWall()</code> → one Wall</td><td><code>wall_id</code> FK column in the <b>route</b> table (FK on the “many” side)</td></tr>
+<tr><td>ManyToMany</td><td><code>member.getCompletedRoutes()</code> → collection; <code>route.getCompletedBy()</code> → collection</td><td>a <b>join table</b> (e.g. <code>rel_member__completed_routes</code>) created automatically</td></tr></table>
+<p>For OneToMany, the “one” entity is written first. Plural field names on both sides are the giveaway for ManyToMany. Syntax checked with the JDL parser.
+(The exact generated join-table name depends on the JHipster version; I'd want to verify that detail.)</p></div></details>
+</div><div class="q" id="q31">
+<div class="qhead"><span class="qnum">Q31</span><span class="tag">JDL direction</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>For each line, which of <code>student.getProfile()</code> and <code>profile.getStudent()</code> exist, and is it uni- or bidirectional?</p><pre><code>relationship OneToOne { Student to StudentProfile }                      // (a)
+relationship OneToOne { Student{profile} to StudentProfile }             // (b)
+relationship OneToOne { Student{profile} to StudentProfile{student} }    // (c)</code></pre><p>What rule does the lecture give for choosing?</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th></th><th>Direction</th><th>Available</th></tr>
+<tr><td>(a)</td><td>neither side named</td><td>neither; the relationship exists in the database only</td></tr>
+<tr><td>(b)</td><td>unidirectional</td><td><code>student.getProfile()</code> only</td></tr>
+<tr><td>(c)</td><td>bidirectional</td><td>both</td></tr></table>
+<p>Rule: <b>put <code>{name}</code> only on the side your code actually needs to navigate from</b>. Ask: will my code ever say
+<code>thisEntity.getOtherEntity()</code>? The getters are called on <i>objects</i> (lowercase <code>student</code>), not the class
+(<code>Student</code>), which is the lecture's “car vs myCar” point.</p></div></details>
+</div><div class="q" id="q32">
+<div class="qhead"><span class="qnum">Q32</span><span class="tag">JDL debugging</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Find four problems in this JDL (three stop it parsing; one parses but means the wrong thing):</p><pre><code>entity Lecturer {
+  name string required,
+  officeHours List&lt;String&gt;
+}
+entity Module {
+  code String required unique,
+  credits int
+}
+// intended: one lecturer teaches many modules
+relationship OneToMany {
+  Module{lecturer} to Lecturer{modules}
+}</code></pre></div>
+<details><summary>Show answer</summary><div class="ans"><ol><li><code>string</code> → <code>String</code>. Type names must start with a capital (real parser error: “typeName must match
+/^[A-Z][A-Za-z0-9]*$/, got string”).</li>
+<li><code>List&lt;String&gt;</code>: JDL has no List/Set types (syntax error on <code>&lt;</code>). Make <code>OfficeHour</code> an entity with a relationship.</li>
+<li><code>int</code> → <code>Integer</code>, same capitalisation rule.</li>
+<li>The relationship is reversed. <code>OneToMany { Module … to Lecturer … }</code> says <i>one module has many lecturers</i>.
+It should be <code>Lecturer{modules} to Module{lecturer}</code>: the “one” side first.</li></ol>
+<p>Fixed version:</p><pre><code>entity Lecturer {
+  name String required
+}
+entity Module {
+  code String required unique,
+  credits Integer
+}
+relationship OneToMany {
+  Lecturer{modules} to Module{lecturer}
+}</code></pre><p>(Errors 1–3 confirmed by running the JDL parser; the fixed version parses.)</p></div></details>
+</div><div class="q" id="q33">
+<div class="qhead"><span class="qnum">Q33</span><span class="tag">four representations</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture says one relationship can be written four ways. For <b>Lecturer teaches Module (1:M)</b> give: the ER description,
+the JDL, the Java fields JHipster would generate, and the database tables. Then do the same for Student–Module (M:M).</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th></th><th>Lecturer–Module (1:M)</th><th>Student–Module (M:M)</th></tr>
+<tr><td>ER</td><td>LECTURER 1 —teaches— M MODULE</td><td>STUDENT M —takes— M MODULE</td></tr>
+<tr><td>JDL</td><td><code>relationship OneToMany { Lecturer{modules} to Module{lecturer} }</code></td><td><code>relationship ManyToMany { Student{modules} to Module{students} }</code></td></tr>
+<tr><td>Java</td><td><code>Lecturer: Set&lt;Module&gt; modules</code><br><code>Module: Lecturer lecturer</code></td><td><code>Student: Set&lt;Module&gt; modules</code><br><code>Module: Set&lt;Student&gt; students</code></td></tr>
+<tr><td>Database</td><td><code>lecturer</code>, <code>module</code> (with <code>lecturer_id</code> FK)</td><td><code>student</code>, <code>module</code>, and a join table <code>student_module</code> created automatically</td></tr></table>
+<p>The lecture's test of understanding: if you can draw the ER diagram you should be able to predict the JDL, and from the JDL predict the
+generated code. (<code>Set&lt;Module&gt;</code> is a Java collection with no duplicates; it's why JDL itself never needs a List type.)
+The Java/JPA mapping returns in Week 4 (ORM, Hibernate).</p></div></details>
+</div>
+</div><script>
+const KEY = location.pathname + '::done';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function refresh(){const s=load();let n=0;
+ document.querySelectorAll('.q').forEach(q=>{const on=!!s[q.id];q.classList.toggle('done',on);
+  const cb=q.querySelector('.tick input');if(cb)cb.checked=on;if(on)n++;});
+ const p=document.querySelector('.prog');if(p)p.textContent=n+' / '+document.querySelectorAll('.q').length+' marked confident';}
+document.addEventListener('change',e=>{if(e.target.matches('.tick input')){const s=load();
+ const id=e.target.closest('.q').id;if(e.target.checked)s[id]=1;else delete s[id];save(s);refresh();}});
+function setAll(open){document.querySelectorAll('.q').forEach(q=>{if(open&&q.querySelector('.opts'))return;const d=q.querySelector('details');if(d)d.open=open;})}
+function resetTicks(){save({});refresh()}
+function copyPre(btn){const t=btn.parentElement.querySelector('pre').innerText;
+ navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1500)})}
+// Shuffle each question's options on every load (Fisher-Yates), so answer position can't be memorised.
+document.querySelectorAll('.opts').forEach(box=>{const o=[...box.children];
+ for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]];}
+ o.forEach(b=>box.appendChild(b));});
+function pick(btn){const box=btn.closest('.opts');const right=+box.dataset.c;
+ box.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(+b.dataset.i===right)b.classList.add('right');});
+ if(+btn.dataset.i!==right)btn.classList.add('wrong');
+ const d=btn.closest('.q').querySelector('details');if(d)d.open=true;}
+refresh();
+</script></body></html>

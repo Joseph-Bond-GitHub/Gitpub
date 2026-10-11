@@ -1,0 +1,387 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Databases · Week 2 practice: normalisation</title><style>
+:root{
+ --bg:#f7f5f0;--card:#ffffff;--ink:#1d1f24;--muted:#5d6370;--line:#e2ddd2;
+ --accent:#2f5d8a;--accent-soft:#e6eef7;--good:#2e7d4f;--good-soft:#e5f3ea;
+ --warn:#9a5b00;--warn-soft:#fbf0dc;--code-bg:#f1efe9;--code-ink:#2a2d33;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+}
+:root[data-theme="dark"]{
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+header h1{font-family:Georgia,"Iowan Old Style",serif;font-weight:600;font-size:2rem;line-height:1.2;margin:0 0 6px}
+header .sub{color:var(--muted);margin:0 0 18px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+ padding:10px 0;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);cursor:pointer}
+.bar button:hover{border-color:var(--accent)}
+.bar .prog{margin-left:auto;color:var(--muted);font-size:.9rem}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+.intro p:first-child{margin-top:0}.intro p:last-child{margin-bottom:0}
+h2.sec{font-family:Georgia,serif;font-weight:600;font-size:1.35rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+.q.done{border-left:4px solid var(--good)}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qnum{font-weight:700;color:var(--accent)}
+.tag{font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.tag.marks{background:var(--code-bg);color:var(--muted)}
+.tick{margin-left:auto;font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+details{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";}details[open] summary::before{content:"▾ ";}
+.ans{margin-top:8px}
+pre,code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.88rem}
+code{background:var(--code-bg);color:var(--code-ink);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);color:var(--code-ink);padding:12px 14px;border-radius:8px;overflow-x:auto;line-height:1.45}
+pre code{background:none;padding:0}
+.out{border-left:3px solid var(--good)}
+.err{border-left:3px solid var(--warn)}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 2px}
+.note{background:var(--warn-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+.note b:first-child{color:var(--warn)}
+.tip{background:var(--good-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+table.t{border-collapse:collapse;margin:8px 0;font-size:.9rem;display:block;overflow-x:auto}
+table.t th,table.t td{border:1px solid var(--line);padding:4px 10px;text-align:left;white-space:nowrap}
+table.t th{background:var(--code-bg)}
+.copy{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+ol li,ul li{margin:3px 0}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{font:inherit;text-align:left;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt[disabled]{cursor:default}
+.opt b{color:var(--muted);margin-right:6px}
+.tag.mcq{background:var(--good-soft);color:var(--good)}
+@media print{.bar,.tick,.copy{display:none}details{display:block}details>*{display:block}}
+</style></head><body><div class="wrap">
+<header><h1>Databases · Week 2 practice: normalisation</h1><p class="sub">Anomalies, functional and transitive dependencies, 1NF → 2NF → 3NF</p></header>
+<div class="bar"><button onclick="setAll(true)">Reveal written answers</button>
+<button onclick="setAll(false)">Hide all</button><button onclick="resetTicks()">Reset ticks</button>
+<span class="prog"></span></div>
+<div class="intro"><p>Practice for the <b>normalisation</b> half of Week 2: why we normalise, the three anomalies, functional and transitive
+dependencies, and 1NF → 2NF → 3NF, which is the scope the slides set (“This module looks at 1NF, 2NF, 3NF”). One question is tagged
+<span class="tag">beyond slides</span>. A single music-school table is reused through the page (Q3, Q7, Q8, Q15, Q16) so you see one example go the whole way.</p>
+<p>Multiple-choice questions check themselves when you click; for written ones, answer on paper first.</p>
+<div class="note"><b>Convention check.</b> Your slides define the normal forms in their own words, which are a little different from textbooks:
+<ul><li><b>1NF</b> (slide 14) has four criteria, including “there must be a primary key”. Codd's original 1NF is only about atomic values.
+In a test, give the slide's four.</li>
+<li>The slides' worked <b>1NF example</b> adds a primary key but keeps <code>Class 1 … Class 4</code> as columns; the hackr.io diagram on the
+same slides says 1NF “eliminates repeating groups”. Most textbooks would remove those columns <i>at 1NF</i>. The answers here do that
+and say so.</li>
+<li><b>2NF</b> and <b>3NF</b> are stated relative to “the primary key”. Textbooks state them relative to every candidate key. Same answer
+for every example here.</li></ul></div></div>
+<h2 class="sec">A. What normalisation is for</h2><div class="q" id="q1">
+<div class="qhead"><span class="qnum">Q1</span><span class="tag mcq">multiple choice</span><span class="tag">what is normalisation</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>According to the lecture, when and how is normalisation done?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Automatically, by the DBMS, whenever a table is created</button><button class="opt" data-i="1" onclick="pick(this)">Manually, at design time</button><button class="opt" data-i="2" onclick="pick(this)">At query time, by the SQL optimiser</button><button class="opt" data-i="3" onclick="pick(this)">Only after the database has gone live and anomalies appear</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> Normalisation is a process used in data modelling/database creation where you organise data and tables so they can be
+added to and updated efficiently. It is done <b>manually at design time</b> (“no click a button and do it!”). In the Week 1 design steps
+it is <b>schema refinement</b>. It was introduced by Codd alongside the relational model in the early 1970s.</p></div></details>
+</div><div class="q" id="q2">
+<div class="qhead"><span class="qnum">Q2</span><span class="tag">why normalise</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Give <b>five</b> reasons from the lecture for normalising a database.</p></div>
+<details><summary>Show answer</summary><div class="ans"><ul><li>Make the database more efficient.</li>
+<li>Prevent duplicates: the same data stored in more than one place.</li>
+<li>Ensure consistency: stop updates being applied to some copies but not others.</li>
+<li>Prevent data not being deleted when it should be, or lost when it shouldn't be.</li>
+<li>Ensure data accuracy.</li><li>Reduce storage space.</li><li>Optimise query execution times.</li></ul>
+<p>Without it, the database is likely to be slow and hard to manage, update and keep accurate. Notice these are Week 1's redundancy
+problems again: normalisation is the systematic way to apply Guideline 2 (“do not repeat information”).</p></div></details>
+</div><div class="q" id="q3">
+<div class="qhead"><span class="qnum">Q3</span><span class="tag">anomalies</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>A music school stores everything in one table:</p><table class="t"><tr><th>Pupil Name</th><th>Fees Paid</th><th>Date of Birth</th><th>Instrument</th><th>Lesson 1</th><th>Lesson 2</th><th>Tutor</th></tr>
+<tr><td>Emma Clarke</td><td>300</td><td>12-Mar-08</td><td>Piano</td><td>Theory 1</td><td>Aural 1</td><td>Mr Hale</td></tr>
+<tr><td>Raj Patel</td><td>450</td><td>01-Jul-09</td><td>Violin</td><td>Theory 1</td><td>Orchestra</td><td>Ms Osei</td></tr>
+<tr><td>Lucy Moore</td><td>450</td><td>23-Nov-08</td><td>Cello</td><td>Orchestra</td><td></td><td>Ms Osei</td></tr></table>
+<p>Business rules: each instrument is taught by exactly one tutor (a tutor may teach several instruments); each pupil learns one
+instrument; pupils attend any number of group lessons.</p><p>Give one concrete <b>INSERT</b>, <b>UPDATE</b> and <b>DELETE anomaly</b>, in the lecture's terms.</p></div>
+<details><summary>Show answer</summary><div class="ans"><ul><li><b>INSERT anomaly</b> (you can't add something without adding unrelated data, or you add incomplete data): a new group lesson
+“Jazz Ensemble” can't be recorded until a pupil takes it, because lessons only exist as cells in pupil rows. A new pupil whose instrument
+isn't decided yet gets incomplete data (NULL Instrument and Tutor).</li>
+<li><b>UPDATE anomaly</b> (you update a record but fail to make all the necessary changes): rename “Theory 1” to “Music Theory 1”. It appears in
+several rows <i>and</i> in different columns (Lesson 1 here, Lesson 2 elsewhere). Miss one and the data is inconsistent. Same if Ms Osei's name
+changes.</li>
+<li><b>DELETE anomaly</b> (deleting one thing removes other data you wanted to keep): if Lucy Moore leaves and her row is deleted, the only
+record that <b>Cello is taught by Ms Osei</b> disappears. If Emma leaves, “Aural 1” vanishes entirely.</li></ul></div></details>
+</div><div class="q" id="q4">
+<div class="qhead"><span class="qnum">Q4</span><span class="tag mcq">multiple choice</span><span class="tag">anomalies</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>“Susan Johnson drops out; deleting her record removes all traces of Biology 2 and Biology 3.” Which anomaly is this?</p></div><div class="opts" data-c="2"><button class="opt" data-i="0" onclick="pick(this)">Insert anomaly</button><button class="opt" data-i="1" onclick="pick(this)">Update anomaly</button><button class="opt" data-i="2" onclick="pick(this)">Delete anomaly</button><button class="opt" data-i="3" onclick="pick(this)">Transitive dependency</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: a DELETE anomaly:</b> deleting one thing (a student) removes other data you wanted to keep (that those classes exist). This is the slides' own example.</p></div></details>
+</div><h2 class="sec">B. Normal forms, 1NF and functional dependencies</h2><div class="q" id="q5">
+<div class="qhead"><span class="qnum">Q5</span><span class="tag mcq">multiple choice</span><span class="tag">normal forms</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The “Normalisation Levels” slide draws 1NF ⊃ 2NF ⊃ 3NF ⊃ BCNF as nested shapes. Which statement follows?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Every table in 2NF is in 3NF</button><button class="opt" data-i="1" onclick="pick(this)">Every table in 3NF is also in 2NF and 1NF</button><button class="opt" data-i="2" onclick="pick(this)">1NF is the strictest normal form</button><button class="opt" data-i="3" onclick="pick(this)">A table can be in 3NF without being in 1NF</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> Each normal form's definition starts “fulfils the requirements of the previous one”, so the sets nest: every 3NF table is in
+2NF and 1NF, but not the other way round. The innermost (BCNF) is the strictest. The lecture notes add 4NF, 5NF, even 6NF, but 3NF is the
+one you'll most commonly see in practice.</p></div></details>
+</div><div class="q" id="q6">
+<div class="qhead"><span class="qnum">Q6</span><span class="tag">normal forms</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>According to the hackr.io diagram in the slides, what does each normal form eliminate? 1NF, 2NF, 3NF, 4NF, 5NF.</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th>Form</th><th>Eliminates</th></tr>
+<tr><td>1NF</td><td>repeating groups</td></tr><tr><td>2NF</td><td>partial functional dependency</td></tr>
+<tr><td>3NF</td><td>transitive dependency</td></tr><tr><td>4NF</td><td>multi-valued dependency</td></tr>
+<tr><td>5NF</td><td>join dependency</td></tr></table>
+<p>The diagram also shows each step <b>decomposing</b> the relation into more, smaller relations (R → R₁₁, R₁₂ → R₂₁, R₂₂, R₂₃ …). Only 1NF–3NF
+are in scope here; 4NF/5NF are recognition only.</p></div></details>
+</div><div class="q" id="q7">
+<div class="qhead"><span class="qnum">Q7</span><span class="tag">1NF</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) State the lecture's <b>four criteria for 1NF</b>. (b) Which does the music-school table break, and how?</p><table class="t"><tr><th>Pupil Name</th><th>Fees Paid</th><th>Date of Birth</th><th>Instrument</th><th>Lesson 1</th><th>Lesson 2</th><th>Tutor</th></tr>
+<tr><td>Emma Clarke</td><td>300</td><td>12-Mar-08</td><td>Piano</td><td>Theory 1</td><td>Aural 1</td><td>Mr Hale</td></tr>
+<tr><td>Raj Patel</td><td>450</td><td>01-Jul-09</td><td>Violin</td><td>Theory 1</td><td>Orchestra</td><td>Ms Osei</td></tr>
+<tr><td>Lucy Moore</td><td>450</td><td>23-Nov-08</td><td>Cello</td><td>Orchestra</td><td></td><td>Ms Osei</td></tr></table>
+<p>Business rules: each instrument is taught by exactly one tutor (a tutor may teach several instruments); each pupil learns one
+instrument; pupils attend any number of group lessons.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> (1) A single cell must not hold more than one value (<b>atomicity</b>). (2) There must be a <b>primary key</b> for
+identification. (3) No duplicated rows or columns. (4) Each column must have only one value for each row.</p>
+<p><b>(b)</b></p><ul>
+<li><b>No primary key.</b> Pupil Name isn't unique (two pupils could share a name), and neither is any other column. As in the slides, introduce a
+<code>PupilID</code>.</li>
+<li><b>Repeating group / duplicated columns:</b> <code>Lesson 1</code>, <code>Lesson 2</code> are the same kind of column repeated. How many do you allow?
+Lucy has an empty one; a pupil with three lessons doesn't fit at all. (Cells are each atomic here, but the slide's own Class columns are written as
+“Biology 1 (Science)”, two facts in one cell: a lesson and its department. That would break atomicity.)</li></ul></div></details>
+</div><div class="q" id="q8">
+<div class="qhead"><span class="qnum">Q8</span><span class="tag mcq">multiple choice</span><span class="tag">functional dependency</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>In the functional dependency <code>X → Y</code>, what does the lecture call <b>X</b>?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Dependent</button><button class="opt" data-i="1" onclick="pick(this)">Determinant</button><button class="opt" data-i="2" onclick="pick(this)">Primary attribute</button><button class="opt" data-i="3" onclick="pick(this)">Candidate</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: the determinant.</b> Y is the <b>dependent</b>. A <b>functional dependency</b> says one attribute (set) determines the value of another:
+whenever two rows agree on X, they must agree on Y. Read <code>StudentID → StudentName</code> as “StudentID determines StudentName”:
+know the ID and there's exactly one name.</p></div></details>
+</div><div class="q" id="q9">
+<div class="qhead"><span class="qnum">Q9</span><span class="tag">functional dependency</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>For the music school, decide which of these are functional dependencies. For each that is, name the determinant and dependent.</p>
+<ol type="a"><li>PupilID → Pupil Name</li><li>Pupil Name → PupilID</li><li>Instrument → Tutor</li><li>Tutor → Instrument</li>
+<li>PupilID → Lesson</li><li>PupilID → Instrument</li></ol></div>
+<details><summary>Show answer</summary><div class="ans"><ol type="a"><li><b>Yes.</b> Determinant PupilID, dependent Pupil Name: one ID, one name.</li>
+<li><b>No.</b> Two pupils can share a name, so a name can map to several IDs.</li>
+<li><b>Yes</b> (business rule: each instrument has one tutor). Determinant Instrument, dependent Tutor.</li>
+<li><b>No.</b> Ms Osei teaches Violin <i>and</i> Cello.</li>
+<li><b>No.</b> A pupil attends several lessons. This is why lessons can't stay as a column of the pupil table: it's a many-to-many
+relationship, not a dependency.</li>
+<li><b>Yes</b> (each pupil learns one instrument).</li></ol>
+<p>Key habit: FDs come from the <b>business rules</b>, not from spotting patterns in today's rows. Three rows of sample data can't prove a rule holds.</p></div></details>
+</div><h2 class="sec">C. 2NF and 3NF</h2><div class="q" id="q10">
+<div class="qhead"><span class="qnum">Q10</span><span class="tag mcq">multiple choice</span><span class="tag">2NF</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>When can a <b>partial dependency</b> exist?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Only when the table has no primary key</button><button class="opt" data-i="1" onclick="pick(this)">Only when the primary key is composite (two or more columns)</button><button class="opt" data-i="2" onclick="pick(this)">Only when the table contains NULLs</button><button class="opt" data-i="3" onclick="pick(this)">In any table that has more than three columns</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> A partial dependency is a non-key attribute depending on only <i>part</i> of the primary key. If the key is a single column, it has
+no “part” to depend on, so (slide 19) a table in 1NF with a single-column PK is already in 2NF.</p></div></details>
+</div><div class="q" id="q11">
+<div class="qhead"><span class="qnum">Q11</span><span class="tag">2NF</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p><code>OrderLine(order_id, product_id, quantity, order_date, customer_name, product_name, unit_price)</code> with primary key
+<b>(order_id, product_id)</b>. Rules: an order is placed on one date by one customer; each product has one name and one price.</p>
+<p>(a) Write down the FDs. (b) Which are partial dependencies? (c) Decompose to 2NF, marking PKs and FKs.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b></p><pre><code>order_id, product_id → quantity
+order_id             → order_date, customer_name
+product_id           → product_name, unit_price</code></pre>
+<p><b>(b)</b> The last two: their determinants are each <i>part</i> of the composite key. Only <code>quantity</code> depends on the
+<b>entire</b> key (how many of <i>this</i> product on <i>this</i> order).</p>
+<p><b>(c)</b> Move each partial dependency into its own table, keyed on the part of the key it depends on:</p>
+<pre><code>Order    (<u>order_id</u>, order_date, customer_name)
+Product  (<u>product_id</u>, product_name, unit_price)
+OrderLine(<u>order_id</u> FK → Order, <u>product_id</u> FK → Product, quantity)</code></pre>
+<p>OrderLine is now a junction table for the M:M between Order and Product (Week 1's pattern). Changing a price now means updating one row.</p></div></details>
+</div><div class="q" id="q12">
+<div class="qhead"><span class="qnum">Q12</span><span class="tag">3NF</span><span class="tag marks">7 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Define a <b>transitive dependency</b> and quote Bill Kent's phrase for 3NF.<br>
+(b) <code>Employee(emp_id, name, dept_id, dept_name, dept_floor)</code>, PK <code>emp_id</code>. Each employee is in one department;
+each department has one name and one floor. Is it in 2NF? 3NF? Decompose if needed.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> A <b>transitive dependency</b> is when A → B and B → C, so A → C holds “through” B, where B is a non-key attribute.
+You can find a non-key attribute using another non-key attribute. 3NF: in 2NF and no transitive dependencies; every non-key attribute must provide
+“a fact about the key, the whole key, and nothing but the key”.</p>
+<p><b>(b)</b> 2NF: <b>yes</b>, the PK is a single column so there can be no partial dependency. 3NF: <b>no</b>:
+<code>emp_id → dept_id → dept_name, dept_floor</code>. Department facts depend on <code>dept_id</code>, a non-key attribute.</p>
+<pre><code>Department(<u>dept_id</u>, dept_name, dept_floor)
+Employee  (<u>emp_id</u>, name, dept_id FK → Department)</code></pre>
+<p>The pattern is the slides' Student/Postcode split: the attribute in the middle (dept_id) becomes the PK of a new table and stays behind as a FK.</p></div></details>
+</div><div class="q" id="q13">
+<div class="qhead"><span class="qnum">Q13</span><span class="tag">3NF</span><span class="tag">think</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Slide 29 says “Student ID → City and City → Postcode, eventually resulting in Student ID → Postcode”. The 3NF solution on slide 30 creates
+<code>(Postcode PK, City)</code> and keeps <code>Postcode</code> as a FK in Student. <b>Is the slide's FD direction consistent with its own solution?</b>
+Which direction is right in the real world?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p>It isn't consistent. A table <code>(Postcode PK, City)</code> stores the dependency <b>Postcode → City</b>: the key determines the other column.
+And in reality a postcode lies in one city, while a city has many postcodes, so City → Postcode is false. The correct chain is:</p>
+<pre><code>StudentID → Postcode → City        so  StudentID → City (transitively)</code></pre>
+<p>The slide's prose (“we can identify the City using Postcode”) agrees with this; only the arrow line is reversed. In the test, write it as
+<b>StudentID → Postcode → City</b>. If you rely on the slide's arrows, the “middle” attribute would be City, and the decomposition would come out
+differently. That's why getting the direction right matters. (I'd treat this as a typo on the slide; worth checking with the lecturer if you can.)</p></div></details>
+</div><div class="q" id="q14">
+<div class="qhead"><span class="qnum">Q14</span><span class="tag">identify the normal form</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Give the highest of 1NF, 2NF, 3NF for each (assume each already has atomic values and a primary key, underlined), and justify:</p>
+<ol type="a"><li><code>Booking(<u>room_id</u>, <u>date</u>, booked_by, room_capacity)</code>; room_id → room_capacity</li>
+<li><code>Student(<u>student_id</u>, name, postcode, city)</code>; postcode → city</li>
+<li><code>Room(<u>room_id</u>, room_name, room_capacity, room_zoom)</code>; no other dependencies</li>
+<li><code>Enrolment(<u>student_id</u>, <u>module_id</u>, grade, module_title)</code>; module_id → module_title</li></ol></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th></th><th>Highest</th><th>Why</th></tr>
+<tr><td>(a)</td><td><b>1NF</b></td><td>room_capacity depends on only <i>part</i> of the composite key (room_id): partial dependency.</td></tr>
+<tr><td>(b)</td><td><b>2NF</b></td><td>Single-column key ⇒ 2NF, but student_id → postcode → city is transitive.</td></tr>
+<tr><td>(c)</td><td><b>3NF</b></td><td>Every attribute is a fact about room_id and nothing else. (This is the lecture's Room table.)</td></tr>
+<tr><td>(d)</td><td><b>1NF</b></td><td>module_title depends on part of the key (module_id). grade is fine: it needs both.</td></tr></table>
+<p>Method: first check for partial dependencies (only possible with composite keys), then for non-key → non-key dependencies.</p></div></details>
+</div><h2 class="sec">D. Putting it together</h2><div class="q" id="q15">
+<div class="qhead"><span class="qnum">Q15</span><span class="tag">full worked example</span><span class="tag marks">12 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Normalise the music-school table step by step: <b>UNF → 1NF → 2NF → 3NF</b>. At each step, give the tables with PKs (and FKs) and say what was removed.</p><table class="t"><tr><th>Pupil Name</th><th>Fees Paid</th><th>Date of Birth</th><th>Instrument</th><th>Lesson 1</th><th>Lesson 2</th><th>Tutor</th></tr>
+<tr><td>Emma Clarke</td><td>300</td><td>12-Mar-08</td><td>Piano</td><td>Theory 1</td><td>Aural 1</td><td>Mr Hale</td></tr>
+<tr><td>Raj Patel</td><td>450</td><td>01-Jul-09</td><td>Violin</td><td>Theory 1</td><td>Orchestra</td><td>Ms Osei</td></tr>
+<tr><td>Lucy Moore</td><td>450</td><td>23-Nov-08</td><td>Cello</td><td>Orchestra</td><td></td><td>Ms Osei</td></tr></table>
+<p>Business rules: each instrument is taught by exactly one tutor (a tutor may teach several instruments); each pupil learns one
+instrument; pupils attend any number of group lessons.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>1NF.</b> Introduce a primary key <code>PupilID</code> (names aren't unique). Remove the repeating group Lesson 1/Lesson 2 by giving each
+pupil–lesson pair its own row:</p>
+<pre><code>PupilLessons(<u>PupilID</u>, <u>Lesson</u>, PupilName, FeesPaid, DOB, Instrument, Tutor)</code></pre>
+<p>The key is now <b>(PupilID, Lesson)</b>, since a pupil appears once per lesson. (The slides' own example keeps Class 1–4 at 1NF and removes them at 2NF.
+Either way you end up in the same place.)</p>
+<p><b>2NF.</b> Partial dependencies on that composite key: <code>PupilID → PupilName, FeesPaid, DOB, Instrument, Tutor</code>. Nothing depends on the
+whole key; lessons themselves become their own table so a lesson can exist with no pupils (fixing the insert anomaly):</p>
+<pre><code>Pupil      (<u>PupilID</u>, PupilName, FeesPaid, DOB, Instrument, Tutor)
+Lesson     (<u>LessonID</u>, LessonName)
+PupilLesson(<u>PupilID</u> FK, <u>LessonID</u> FK)          -- M:M junction table</code></pre>
+<p><b>3NF.</b> In Pupil, <code>PupilID → Instrument → Tutor</code> is transitive (Tutor is a fact about the instrument, not the pupil). Split it out,
+and give tutors their own table so a tutor's name is stored once:</p>
+<pre><code>Tutor      (<u>TutorID</u>, TutorName)
+Instrument (<u>InstrumentID</u>, InstrumentName, TutorID FK → Tutor)
+Pupil      (<u>PupilID</u>, PupilName, FeesPaid, DOB, InstrumentID FK → Instrument)
+Lesson     (<u>LessonID</u>, LessonName)
+PupilLesson(<u>PupilID</u> FK → Pupil, <u>LessonID</u> FK → Lesson)</code></pre>
+<p>Check the anomalies from Q3: a new lesson is just a row in Lesson; renaming “Theory 1” changes one row; deleting Lucy leaves “Cello → Ms Osei” intact.
+(Slide 21 says “program name is not dependent on the student”. Strictly, StudentID → Program does hold, as each student has one program, which is
+exactly why the slides keep <code>Program ID</code> in Student as a FK. What gets split out are the facts <i>about</i> the program, just as
+Instrument's tutor is here.)</p></div></details>
+</div><div class="q" id="q16">
+<div class="qhead"><span class="qnum">Q16</span><span class="tag">SQL</span><span class="tag">3NF</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Write <code>CREATE TABLE</code> statements for your 3NF result (use the lecture's style: <code>integer</code>/<code>text</code>/<code>date</code>,
+<code>NOT NULL</code>, <code>PRIMARY KEY (…)</code>, plus <code>REFERENCES</code> for FKs), insert the three pupils, and write a query that rebuilds
+“one row per pupil per lesson, with instrument and tutor”. Run it in pgAdmin.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer (run on PostgreSQL 16)</div><pre><code>DROP TABLE IF EXISTS pupil_lesson, lesson, pupil, instrument, tutor CASCADE;
+
+CREATE TABLE tutor (
+    tutor_id integer NOT NULL,
+    name     text    NOT NULL,
+    PRIMARY KEY (tutor_id)
+);
+CREATE TABLE instrument (
+    instrument_id integer NOT NULL,
+    name          text    NOT NULL,
+    tutor_id      integer REFERENCES tutor(tutor_id),
+    PRIMARY KEY (instrument_id)
+);
+CREATE TABLE pupil (
+    pupil_id      integer NOT NULL,
+    name          text    NOT NULL,
+    fees_paid     integer,
+    date_of_birth date,
+    instrument_id integer REFERENCES instrument(instrument_id),
+    PRIMARY KEY (pupil_id)
+);
+CREATE TABLE lesson (
+    lesson_id integer NOT NULL,
+    name      text    NOT NULL,
+    PRIMARY KEY (lesson_id)
+);
+CREATE TABLE pupil_lesson (
+    pupil_id  integer REFERENCES pupil(pupil_id),
+    lesson_id integer REFERENCES lesson(lesson_id),
+    PRIMARY KEY (pupil_id, lesson_id)
+);
+
+INSERT INTO tutor VALUES (1, 'Mr Hale'), (2, 'Ms Osei');
+INSERT INTO instrument VALUES (1, 'Piano', 1), (2, 'Violin', 2), (3, 'Cello', 2);
+INSERT INTO pupil VALUES
+    (101, 'Emma Clarke', 300, '2008-03-12', 1),
+    (102, 'Raj Patel',   450, '2009-07-01', 2),
+    (103, 'Lucy Moore',  450, '2008-11-23', 3);
+INSERT INTO lesson VALUES (1, 'Theory 1'), (2, 'Aural 1'), (3, 'Orchestra');
+INSERT INTO pupil_lesson VALUES (101, 1), (101, 2), (102, 1), (102, 3), (103, 3);
+
+-- Rebuild the original "one row per pupil per lesson" view of the data
+SELECT p.name AS pupil, i.name AS instrument, t.name AS tutor, l.name AS lesson
+FROM pupil p
+JOIN instrument   i  ON i.instrument_id = p.instrument_id
+JOIN tutor        t  ON t.tutor_id      = i.tutor_id
+JOIN pupil_lesson pl ON pl.pupil_id     = p.pupil_id
+JOIN lesson       l  ON l.lesson_id     = pl.lesson_id
+ORDER BY p.pupil_id, l.lesson_id;
+</code></pre><div class="label">Expected output</div><pre class="out"><code>    pupil    | instrument |  tutor  |  lesson
+-------------+------------+---------+-----------
+ Emma Clarke | Piano      | Mr Hale | Theory 1
+ Emma Clarke | Piano      | Mr Hale | Aural 1
+ Raj Patel   | Violin     | Ms Osei | Theory 1
+ Raj Patel   | Violin     | Ms Osei | Orchestra
+ Lucy Moore  | Cello      | Ms Osei | Orchestra
+(5 rows)</code></pre><p>Table order matters: a table must exist before another can <code>REFERENCES</code> it, so tutor → instrument → pupil, and the drops go in reverse.
+<code>JOIN … ON</code> combines rows where the FK equals the PK (joins are on the SQL page). This is the “how do we connect all the data?” question from
+slide 22: the decomposition is only useful because FKs let you join the pieces back <b>without spurious tuples</b>, Week 1's Guideline 4.</p></div></details>
+</div><div class="q" id="q17">
+<div class="qhead"><span class="qnum">Q17</span><span class="tag mcq">multiple choice</span><span class="tag">foreign keys</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>After the 2NF split into Student, Class, Program and Teacher tables, the slides ask “how do we connect all the data?”. The answer?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">By merging them back into one table each time the data changes</button><button class="opt" data-i="1" onclick="pick(this)">With foreign keys: a column in one table holding the primary key of a row in another</button><button class="opt" data-i="2" onclick="pick(this)">With views that copy the data</button><button class="opt" data-i="3" onclick="pick(this)">By giving every table the same primary key</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer: foreign keys</b> (slide 23): e.g. <code>Program ID</code> in Student, <code>Teacher ID</code> in Program, and the
+<code>(Student ID, Class ID)</code> link table. A FK also enforces <b>referential integrity</b>: you can't point at a program that doesn't exist.</p></div></details>
+</div><div class="q" id="q18">
+<div class="qhead"><span class="qnum">Q18</span><span class="tag">many-to-many</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Slide 24 asks how teachers relate to classes: does a teacher have many classes, and does a class have many teachers? With answers “yes” and
+“possibly yes”, what relationship is it, and how is it stored? Why can't you just add a <code>Teacher ID</code> column to Class?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>Many-to-many</b>. A <code>Teacher ID</code> column in Class can hold only <b>one</b> teacher per class (one value per cell is 1NF), so a
+co-taught class wouldn't fit. Use a junction table:</p>
+<pre><code>ClassTeacher(<u>ClassID</u> FK → Class, <u>TeacherID</u> FK → Teacher)</code></pre>
+<p>Exactly Week 1's rule: M:M needs an associative/junction table; 1:M puts the FK on the many side. If the school's rule were “one teacher per class”,
+<code>Class.TeacherID</code> would be correct. The business rule decides.</p></div></details>
+</div><div class="q" id="q19">
+<div class="qhead"><span class="qnum">Q19</span><span class="tag">BCNF</span><span class="tag">beyond slides</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p><b>Beyond slides.</b> The nesting diagram puts BCNF inside 3NF. In one or two sentences, what extra condition does BCNF add?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p>BCNF (Boyce–Codd Normal Form) requires that <b>every determinant is a candidate key</b>, with no exceptions. 3NF allows one exception:
+a dependency X → A where A is itself part of a key. Example: Tutoring(student, module, tutor) with tutor → module and
+{student, module} → tutor is in 3NF but not BCNF, because tutor is a determinant but not a key. The slides say this module only examines up to 3NF,
+so treat this as background.</p></div></details>
+</div>
+</div><script>
+const KEY = location.pathname + '::done';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function refresh(){const s=load();let n=0;
+ document.querySelectorAll('.q').forEach(q=>{const on=!!s[q.id];q.classList.toggle('done',on);
+  const cb=q.querySelector('.tick input');if(cb)cb.checked=on;if(on)n++;});
+ const p=document.querySelector('.prog');if(p)p.textContent=n+' / '+document.querySelectorAll('.q').length+' marked confident';}
+document.addEventListener('change',e=>{if(e.target.matches('.tick input')){const s=load();
+ const id=e.target.closest('.q').id;if(e.target.checked)s[id]=1;else delete s[id];save(s);refresh();}});
+function setAll(open){document.querySelectorAll('.q').forEach(q=>{if(open&&q.querySelector('.opts'))return;const d=q.querySelector('details');if(d)d.open=open;})}
+function resetTicks(){save({});refresh()}
+function copyPre(btn){const t=btn.parentElement.querySelector('pre').innerText;
+ navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1500)})}
+// Shuffle each question's options on every load (Fisher-Yates), so answer position can't be memorised.
+document.querySelectorAll('.opts').forEach(box=>{const o=[...box.children];
+ for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]];}
+ o.forEach(b=>box.appendChild(b));});
+function pick(btn){const box=btn.closest('.opts');const right=+box.dataset.c;
+ box.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(+b.dataset.i===right)b.classList.add('right');});
+ if(+btn.dataset.i!==right)btn.classList.add('wrong');
+ const d=btn.closest('.q').querySelector('details');if(d)d.open=true;}
+refresh();
+</script></body></html>
