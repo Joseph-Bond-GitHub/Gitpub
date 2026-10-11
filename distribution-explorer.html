@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distribution explorer</title>
+<style>
+:root{--text-primary:#0b0b0b;--text-secondary:#52514e;--text-muted:#898781;--surface-1:#f3f2ee;--surface-bg:#ffffff;--border:rgba(11,11,11,0.15);--radius:8px;--font-mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme: dark){:root{--text-primary:#f0efec;--text-secondary:#c3c2b7;--text-muted:#898781;--surface-1:#262624;--surface-bg:#1e1e1e;--border:rgba(255,255,255,0.15)}}
+*{box-sizing:border-box}
+body{margin:0;padding:12px 16px;background:transparent;color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px}
+.row{display:flex;align-items:center;gap:12px;margin:0 0 10px;flex-wrap:wrap}
+.lbl{font-size:14px;color:var(--text-secondary);min-width:22px}
+.ro{font-size:14px;font-weight:500;min-width:44px;font-family:var(--font-mono)}
+select{font:inherit;font-size:14px;padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-bg);color:var(--text-primary)}
+input[type=range]{accent-color:#2a78d6}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:6px 0 14px}
+.card{background:var(--surface-1);border-radius:var(--radius);padding:12px 14px}
+.card .k{font-size:13px;color:var(--text-secondary);margin:0}
+.card .v{font-size:20px;font-weight:500;margin:4px 0 0;font-family:var(--font-mono)}
+.cap{font-size:13px;color:var(--text-secondary);margin:4px 0}
+.plot{position:relative;height:200px}
+</style>
+</head>
+<body>
+<div class="row"><span class="lbl">Distribution</span>
+<select id="dist">
+<option value="bern">Bernoulli(p) — discrete</option>
+<option value="binom" selected>Binomial(n, p) — discrete</option>
+<option value="geom">Geometric(p) — discrete</option>
+<option value="unif">Uniform(a, b) — continuous</option>
+<option value="gauss">Gaussian N(μ, σ²) — continuous</option>
+</select></div>
+<div id="params"></div>
+<div class="row" style="margin-top:6px"><span class="lbl">x</span>
+<input type="range" id="xs" step="0.05" style="flex:1;min-width:160px">
+<span class="ro" id="xo"></span></div>
+<div class="cards">
+<div class="card"><p class="k" id="Fk"></p><p class="v" id="Fo"></p></div>
+<div class="card"><p class="k" id="fk"></p><p class="v" id="fo"></p></div>
+</div>
+<p class="cap" id="cap1"></p>
+<div class="plot"><canvas id="c1" role="img" aria-label="PMF or PDF with the region at or below x highlighted"></canvas></div>
+<p class="cap" id="cap2" style="margin-top:12px"></p>
+<div class="plot"><canvas id="c2" role="img" aria-label="CDF with the point at x marked"></canvas></div>
+<script>
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}
+function C(n,k){let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r}
+const DEF={
+bern:{disc:true,ps:[['p',0.05,0.95,0.05,0.3]],range:q=>[-1,2],pmf:q=>[[0,1-q.p],[1,q.p]]},
+binom:{disc:true,ps:[['n',1,20,1,10],['p',0.05,0.95,0.05,0.5]],range:q=>[-1,q.n+1],pmf:q=>{const a=[];for(let k=0;k<=q.n;k++)a.push([k,C(q.n,k)*Math.pow(q.p,k)*Math.pow(1-q.p,q.n-k)]);return a}},
+geom:{disc:true,ps:[['p',0.1,0.9,0.05,0.3]],range:q=>[0,20],pmf:q=>{const a=[];for(let k=1;k<=20;k++)a.push([k,Math.pow(1-q.p,k-1)*q.p]);return a}},
+unif:{disc:false,ps:[['a',-3,3,0.1,0],['b',-2,5,0.1,2]],range:q=>[-4,6],f:q=>x=>x>=q.a&&x<=q.b?1/(q.b-q.a):0,F:q=>x=>x<q.a?0:x>q.b?1:(x-q.a)/(q.b-q.a)},
+gauss:{disc:false,ps:[['μ',-3,3,0.1,0],['σ',0.3,3,0.1,1]],range:q=>[-6,6],f:q=>x=>Math.exp(-Math.pow(x-q['μ'],2)/(2*q['σ']*q['σ']))/(Math.sqrt(2*Math.PI)*q['σ']),F:q=>x=>0.5*(1+erf((x-q['μ'])/(q['σ']*Math.SQRT2)))}
+};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+const BLUE=dark?'#3987e5':'#2a78d6',ORANGE=dark?'#d95926':'#eb6834',GRID=dark?'#2c2c2a':'#e1e0d9',AXIS=dark?'#383835':'#c3c2b7',IDLE=dark?'#5f5e5a':'#d3d1c7';
+const el=id=>document.getElementById(id);
+let q={};
+function fmt(v,st){return st>=1?String(v):(+v).toFixed(st<0.1?2:1)}
+function buildParams(){const d=DEF[el('dist').value];q={};el('params').innerHTML='';d.ps.forEach(([nm,mn,mx,st,dv])=>{q[nm]=dv;const r=document.createElement('div');r.className='row';r.innerHTML='<span class="lbl">'+nm+'</span><input type="range" min="'+mn+'" max="'+mx+'" step="'+st+'" value="'+dv+'" style="flex:1;min-width:160px"><span class="ro">'+fmt(dv,st)+'</span>';const inp=r.querySelector('input'),out=r.querySelector('.ro');inp.addEventListener('input',()=>{q[nm]=+inp.value;if(el('dist').value==='unif'&&q.b<=q.a+0.2){if(nm==='a')q.b=+(q.a+0.2).toFixed(1);else q.a=+(q.b-0.2).toFixed(1);el('params').querySelectorAll('.row').forEach((rr,i)=>{const k=i?'b':'a';rr.querySelector('input').value=q[k];rr.querySelector('.ro').textContent=q[k].toFixed(1)})}out.textContent=fmt(q[nm],st);setX();draw()});el('params').appendChild(r)});setX(true)}
+function setX(reset){const d=DEF[el('dist').value],[lo,hi]=d.range(q),s=el('xs');s.min=lo;s.max=hi;if(reset)s.value=d.disc?Math.round((lo+hi)/2):(lo+hi)/2;else s.value=Math.min(hi,Math.max(lo,+s.value))}
+function setup(c){const r=c.parentElement.getBoundingClientRect(),dp=window.devicePixelRatio||1;c.width=r.width*dp;c.height=r.height*dp;c.style.width=r.width+'px';c.style.height=r.height+'px';const g=c.getContext('2d');g.setTransform(dp,0,0,dp,0,0);return{g,w:r.width,h:r.height}}
+const P={l:40,r:10,t:10,b:24};
+function frame(g,w,h,lo,hi,ymax,yt){const X=x=>P.l+(x-lo)/(hi-lo)*(w-P.l-P.r),Y=y=>h-P.b-y/ymax*(h-P.t-P.b);g.clearRect(0,0,w,h);g.font='11px system-ui,sans-serif';g.fillStyle=css('--text-muted');g.strokeStyle=GRID;g.lineWidth=1;yt.forEach(v=>{g.beginPath();g.moveTo(P.l,Y(v));g.lineTo(w-P.r,Y(v));g.stroke();g.textAlign='right';g.fillText(v===0?'0':(+v.toFixed(2)).toString(),P.l-6,Y(v)+4)});g.strokeStyle=AXIS;g.beginPath();g.moveTo(P.l,Y(0));g.lineTo(w-P.r,Y(0));g.stroke();g.textAlign='center';const step=(hi-lo)>12?2:1;for(let x=Math.ceil(lo/step)*step;x<=hi;x+=step)g.fillText(x,X(x),h-P.b+15);return{X,Y}}
+function dot(g,x,y,col,open){g.lineWidth=2;g.beginPath();g.arc(x,y,open?3.5:5,0,7);if(open){g.fillStyle=css('--surface-bg');g.strokeStyle=col;g.fill();g.stroke()}else{g.fillStyle=col;g.strokeStyle=css('--surface-bg');g.fill();g.stroke()}}
+function line(g,X,Y,fn,lo,hi,col){g.strokeStyle=col;g.lineWidth=2;g.lineJoin=g.lineCap='round';g.beginPath();for(let i=0;i<=800;i++){const t=lo+i/800*(hi-lo);i?g.lineTo(X(t),Y(fn(t))):g.moveTo(X(t),Y(fn(t)))}g.stroke()}
+function ticks(m){return[0,m*0.4,m*0.8]}
+function draw(){const d=DEF[el('dist').value],[lo,hi]=d.range(q),x=+el('xs').value;el('xo').textContent=x.toFixed(2);
+const c1=setup(el('c1')),c2=setup(el('c2')),g1=c1.g,g2=c2.g;
+if(d.disc){const pm=d.pmf(q);let F=0,px=0;pm.forEach(([k,p])=>{if(k<=x+1e-9)F+=p;if(Math.abs(k-x)<1e-6)px=p});
+el('Fk').innerHTML='Sum of blue bars = F<sub>X</sub>(x) = P(X ≤ x)';el('Fo').textContent=F.toFixed(3);
+el('fk').innerHTML='P(X = x) = jump height in CDF at x';el('fo').textContent=px.toFixed(3);
+el('cap1').innerHTML='PMF P<sub>X</sub>(k) — blue bars are the values k ≤ x';
+el('cap2').innerHTML='CDF — a staircase. Each jump equals one bar; between values it is flat (slope 0), so no density exists.Height of this line is area under PDF so far. Gradient of this line is current PDF height';
+const ym=Math.max(...pm.map(a=>a[1]))*1.15;let{X,Y}=frame(g1,c1.w,c1.h,lo,hi,ym,ticks(ym));const bw=Math.min(22,(X(1)-X(0))*0.55);
+pm.forEach(([k,p])=>{const on=k<=x+1e-9,hit=Math.abs(k-x)<1e-6;g1.fillStyle=hit?ORANGE:on?BLUE:IDLE;const top=Y(p),bot=Y(0),r=Math.min(4,bw/2,bot-top);g1.beginPath();g1.moveTo(X(k)-bw/2,bot);g1.lineTo(X(k)-bw/2,top+r);g1.quadraticCurveTo(X(k)-bw/2,top,X(k)-bw/2+r,top);g1.lineTo(X(k)+bw/2-r,top);g1.quadraticCurveTo(X(k)+bw/2,top,X(k)+bw/2,top+r);g1.lineTo(X(k)+bw/2,bot);g1.closePath();g1.fill()});
+g1.strokeStyle=ORANGE;g1.lineWidth=1.5;g1.setLineDash([4,3]);g1.beginPath();g1.moveTo(X(x),Y(0));g1.lineTo(X(x),P.t);g1.stroke();g1.setLineDash([]);
+({X,Y}=frame(g2,c2.w,c2.h,lo,hi,1.1,[0,0.5,1]));g2.strokeStyle=BLUE;g2.lineWidth=2;g2.lineCap='round';let cum=0,prev=lo;
+pm.forEach(([k,p])=>{g2.beginPath();g2.moveTo(X(prev),Y(cum));g2.lineTo(X(k),Y(cum));g2.stroke();prev=k;cum+=p});g2.beginPath();g2.moveTo(X(prev),Y(cum));g2.lineTo(X(hi),Y(cum));g2.stroke();
+cum=0;pm.forEach(([k,p])=>{dot(g2,X(k),Y(cum),BLUE,true);cum+=p;dot(g2,X(k),Y(cum),BLUE,false)});
+g2.strokeStyle=ORANGE;g2.lineWidth=1;g2.setLineDash([2,3]);g2.beginPath();g2.moveTo(X(x),Y(0));g2.lineTo(X(x),Y(F));g2.stroke();g2.setLineDash([]);dot(g2,X(x),Y(F),ORANGE,false)}
+else{const f=d.f(q),Fn=d.F(q),Fx=Fn(x),fx=f(x);
+el('Fk').innerHTML='Shaded area under PDF = F<sub>X</sub>(x)';el('Fo').textContent=Fx.toFixed(3);
+el('fk').innerHTML='Height of PDF = slope of CDF = f<sub>X</sub>(x)';el('fo').textContent=fx.toFixed(3);
+el('cap1').innerHTML='PDF f<sub>X</sub>(x) — shaded region is P(X ≤ x)';
+el('cap2').innerHTML='CDF — dot height equals the shaded area; dashed tangent has slope equal to the PDF height.';
+let m=0;for(let i=0;i<=500;i++)m=Math.max(m,f(lo+i/500*(hi-lo)));const ym=m*1.15;let{X,Y}=frame(g1,c1.w,c1.h,lo,hi,ym,ticks(ym));
+g1.fillStyle=BLUE+'2e';g1.beginPath();g1.moveTo(X(lo),Y(0));for(let i=0;i<=500;i++){const t=lo+i/500*(x-lo);g1.lineTo(X(t),Y(f(t)))}g1.lineTo(X(x),Y(0));g1.closePath();g1.fill();
+line(g1,X,Y,f,lo,hi,BLUE);g1.strokeStyle=ORANGE;g1.lineWidth=1.5;g1.setLineDash([4,3]);g1.beginPath();g1.moveTo(X(x),Y(0));g1.lineTo(X(x),Y(fx));g1.stroke();g1.setLineDash([]);dot(g1,X(x),Y(fx),ORANGE,false);
+({X,Y}=frame(g2,c2.w,c2.h,lo,hi,1.1,[0,0.5,1]));line(g2,X,Y,Fn,lo,hi,BLUE);
+const dx=(hi-lo)*0.1;g2.save();g2.beginPath();g2.rect(P.l,P.t,c2.w-P.l-P.r,c2.h-P.t-P.b);g2.clip();g2.strokeStyle=ORANGE;g2.lineWidth=1.5;g2.setLineDash([5,4]);g2.beginPath();g2.moveTo(X(x-dx),Y(Fx-fx*dx));g2.lineTo(X(x+dx),Y(Fx+fx*dx));g2.stroke();g2.restore();g2.setLineDash([]);
+g2.strokeStyle=ORANGE;g2.lineWidth=1;g2.setLineDash([2,3]);g2.beginPath();g2.moveTo(X(x),Y(0));g2.lineTo(X(x),Y(Fx));g2.stroke();g2.setLineDash([]);dot(g2,X(x),Y(Fx),ORANGE,false)}}
+el('dist').addEventListener('change',()=>{buildParams();draw()});el('xs').addEventListener('input',draw);window.addEventListener('resize',draw);buildParams();draw();
+</script>
+</body>
+</html>
