@@ -1,0 +1,919 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Databases · Week 2 practice: PostgreSQL & SQL</title><style>
+:root{
+ --bg:#f7f5f0;--card:#ffffff;--ink:#1d1f24;--muted:#5d6370;--line:#e2ddd2;
+ --accent:#2f5d8a;--accent-soft:#e6eef7;--good:#2e7d4f;--good-soft:#e5f3ea;
+ --warn:#9a5b00;--warn-soft:#fbf0dc;--code-bg:#f1efe9;--code-ink:#2a2d33;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+}
+:root[data-theme="dark"]{
+ --bg:#15171b;--card:#1d2026;--ink:#e7e8ea;--muted:#a1a7b3;--line:#2e323a;
+ --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#78c89a;--good-soft:#1b2c22;
+ --warn:#e3b05c;--warn-soft:#2f2615;--code-bg:#111317;--code-ink:#dfe2e7;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+header h1{font-family:Georgia,"Iowan Old Style",serif;font-weight:600;font-size:2rem;line-height:1.2;margin:0 0 6px}
+header .sub{color:var(--muted);margin:0 0 18px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+ padding:10px 0;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);cursor:pointer}
+.bar button:hover{border-color:var(--accent)}
+.bar .prog{margin-left:auto;color:var(--muted);font-size:.9rem}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+.intro p:first-child{margin-top:0}.intro p:last-child{margin-bottom:0}
+h2.sec{font-family:Georgia,serif;font-weight:600;font-size:1.35rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+.q.done{border-left:4px solid var(--good)}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qnum{font-weight:700;color:var(--accent)}
+.tag{font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.tag.marks{background:var(--code-bg);color:var(--muted)}
+.tick{margin-left:auto;font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+details{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";}details[open] summary::before{content:"▾ ";}
+.ans{margin-top:8px}
+pre,code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.88rem}
+code{background:var(--code-bg);color:var(--code-ink);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);color:var(--code-ink);padding:12px 14px;border-radius:8px;overflow-x:auto;line-height:1.45}
+pre code{background:none;padding:0}
+.out{border-left:3px solid var(--good)}
+.err{border-left:3px solid var(--warn)}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 2px}
+.note{background:var(--warn-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+.note b:first-child{color:var(--warn)}
+.tip{background:var(--good-soft);border-radius:8px;padding:10px 14px;margin:10px 0}
+table.t{border-collapse:collapse;margin:8px 0;font-size:.9rem;display:block;overflow-x:auto}
+table.t th,table.t td{border:1px solid var(--line);padding:4px 10px;text-align:left;white-space:nowrap}
+table.t th{background:var(--code-bg)}
+.copy{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+ol li,ul li{margin:3px 0}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{font:inherit;text-align:left;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt[disabled]{cursor:default}
+.opt b{color:var(--muted);margin-right:6px}
+.tag.mcq{background:var(--good-soft);color:var(--good)}
+@media print{.bar,.tick,.copy{display:none}details{display:block}details>*{display:block}}
+</style></head><body><div class="wrap">
+<header><h1>Databases · Week 2 practice: PostgreSQL & SQL</h1><p class="sub">psql, roles and permissions, CRUD, and the cheat-sheet queries, on the lecture's To Do List app</p></header>
+<div class="bar"><button onclick="setAll(true)">Reveal written answers</button>
+<button onclick="setAll(false)">Hide all</button><button onclick="resetTicks()">Reset ticks</button>
+<span class="prog"></span></div>
+<div class="intro"><p>Practice for the <b>PostgreSQL and SQL</b> half of Week 2, using the lecture's own <b>To Do List app</b>. The
+<code>todo_item</code> table below has exactly the columns and types from the slides; I've added the lookup tables its
+<code>*_id</code> columns were meant to point at (the slides say “we will look at ways to link everything together”), so you can query real data.
+Sections A–C follow the slides; sections D–E cover the rest of the <b>Neon PostgreSQL cheat sheet</b> and are tagged
+<span class="tag">cheat sheet</span>, since joins and set operations are mostly next week's Advanced SQL.</p>
+<p>Every SQL answer here was run on a real PostgreSQL 16 server against exactly this data, with the output pasted underneath.
+Questions that change data either wrap the change in <code>BEGIN … ROLLBACK</code> (so nothing sticks) or tell you to re-run the setup script.</p>
+<p><b>Setup in pgAdmin 4:</b> right-click <i>Databases</i> → <i>Create → Database…</i>, name it <code>todo_practice</code>; select it, open
+<i>Tools → Query Tool</i>; paste the script and press ▶ Execute (F5). It starts by dropping everything, so <b>re-run it whenever you want to reset</b>.
+For the psql questions, pgAdmin also has <i>Tools → PSQL Tool</i>, which opens a real psql prompt connected to the selected database.</p>
+<div><button class="copy" onclick="copyPre(this)">Copy</button><div class="label">Setup script</div><pre><code>-- Practice database for Week 2: the lecture's To Do List app, filled in.
+-- todo_item is exactly the table from the slides; the other tables are the
+-- ones its *_id columns were always meant to point at.
+-- Safe to re-run: it drops everything first.
+
+DROP VIEW  IF EXISTS overdue_items;
+DROP TABLE IF EXISTS todo_item, project, app_user, priority, status, context, place, room CASCADE;
+
+CREATE TABLE public.app_user (
+    user_id    integer NOT NULL,
+    username   text    NOT NULL UNIQUE,
+    full_name  text,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE public.priority (
+    priority_id integer NOT NULL,
+    name        text    NOT NULL,
+    rank        integer NOT NULL CHECK (rank BETWEEN 1 AND 3),   -- 1 = most urgent
+    PRIMARY KEY (priority_id)
+);
+
+CREATE TABLE public.status (
+    status_id integer NOT NULL,
+    name      text    NOT NULL,
+    PRIMARY KEY (status_id)
+);
+
+CREATE TABLE public.context (
+    context_id integer NOT NULL,
+    name       text    NOT NULL,
+    PRIMARY KEY (context_id)
+);
+
+CREATE TABLE public.project (
+    project_id integer NOT NULL,
+    name       text    NOT NULL,
+    owner_id   integer REFERENCES app_user(user_id),
+    PRIMARY KEY (project_id)
+);
+
+-- Same columns and types as the lecture slide, plus FOREIGN KEYs.
+CREATE TABLE public.todo_item (
+    todo_item_id    integer NOT NULL,
+    description     text,
+    owner_id        integer REFERENCES app_user(user_id),
+    priority_id     integer REFERENCES priority(priority_id),
+    context_id      integer REFERENCES context(context_id),
+    status_id       integer REFERENCES status(status_id),
+    project_id      integer REFERENCES project(project_id),
+    due_date        date,
+    completion_date date,
+    PRIMARY KEY (todo_item_id)
+);
+
+INSERT INTO app_user VALUES
+ (1, 'testuser', 'Test User'),
+ (2, 'amira',    'Amira Khan'),
+ (3, 'ben',      'Ben Osei'),
+ (4, 'chloe',    NULL);            -- no items, no projects
+
+INSERT INTO priority VALUES (1,'High',1), (2,'Medium',2), (3,'Low',3);
+INSERT INTO status   VALUES (1,'To do'), (2,'In progress'), (3,'Done');
+INSERT INTO context  VALUES (1,'@uni'), (2,'@home'), (3,'@phone'), (4,'@gym');
+
+INSERT INTO project VALUES
+ (1, 'Databases coursework', 2),
+ (2, 'Move flat',            1),
+ (3, 'Rowing season',        3),
+ (4, 'Learn Haskell',        2);   -- no items yet
+
+INSERT INTO todo_item VALUES
+ (1,  'Read normalisation slides',   2, 1, 1, 3, 1,    '2026-10-05', '2026-10-04'),
+ (2,  'Draw ER diagram in JDL',      2, 1, 1, 2, 1,    '2026-10-09', NULL),
+ (3,  'Practice SQL queries',        2, 1, 1, 1, 1,    '2026-10-12', NULL),
+ (4,  'Book removal van',            1, 2, 3, 1, 2,    '2026-10-20', NULL),
+ (5,  'Pack kitchen',                2, 3, 2, 1, 2,    '2026-10-24', NULL),  -- Amira helping with Test User's project
+ (6,  'Cancel old broadband',        1, 1, 3, 3, 2,    '2026-10-01', '2026-09-30'),
+ (7,  'Erg 2k test',                 3, 2, 4, 1, 3,    '2026-10-18', NULL),
+ (8,  'Buy heart rate strap',        3, 3, NULL, 3, 3, NULL,         '2026-10-02'),
+ (9,  'Email tutor about essay',     2, 2, 3, 1, NULL, '2026-10-08', NULL),
+ (10, 'Write essay plan',            3, 1, 1, 2, NULL, '2026-10-15', NULL),
+ (11, 'Renew railcard',              1, 3, NULL, 1, NULL, NULL,       NULL),
+ (12, 'Submit DB practice test',     2, 1, 1, 3, 1,    '2026-10-10', '2026-10-10');
+</code></pre></div>
+<pre><code>app_user (user_id PK, username UNIQUE, full_name)          4 users; chloe (4) has no items or projects
+priority (priority_id PK, name, rank 1–3)                   High / Medium / Low
+status   (status_id PK, name)                               To do / In progress / Done
+context  (context_id PK, name)                              @uni / @home / @phone / @gym
+project  (project_id PK, name, owner_id FK)                 'Learn Haskell' has no items
+todo_item(todo_item_id PK, description, owner_id FK, priority_id FK, context_id FK,
+          status_id FK, project_id FK, due_date, completion_date)   12 items, some NULLs</code></pre>
+<div class="note"><b>Convention check.</b> (1) The cheat sheet has two typos: <code>CREATE OR REPLACE view_name AS query</code> is missing the word
+<code>VIEW</code>, and its <code>LIMIT … OFFSET … ORDER BY</code> line is in the wrong order; <code>ORDER BY</code> must come <i>before</i>
+<code>LIMIT/OFFSET</code>. (2) The slides recommend PostgreSQL 14.7 or older; everything here also works on 14. The one version difference that
+matters is noted in Q5. (3) “Today” is fixed as 11 Oct 2026 in date questions so the answers stay reproducible; the lecture uses <code>now()</code>.</div></div>
+<h2 class="sec">A. PostgreSQL, psql, users and security</h2><div class="q" id="q1">
+<div class="qhead"><span class="qnum">Q1</span><span class="tag mcq">multiple choice</span><span class="tag">psql vs SQL</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Which of these is a <b>psql</b> command rather than an SQL command?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)"><code>SELECT * FROM todo_item;</code></button><button class="opt" data-i="1" onclick="pick(this)"><code>\dt</code></button><button class="opt" data-i="2" onclick="pick(this)"><code>CREATE ROLE testuser LOGIN;</code></button><button class="opt" data-i="3" onclick="pick(this)"><code>DELETE FROM todo_item WHERE todo_item_id = 3;</code></button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> Lecture rule: <b>psql commands start with a backslash; SQL commands end with a semicolon.</b> psql is PostgreSQL's command-line
+client. Its backslash “meta-commands” are handled by psql itself and only work there; SQL commands are sent to the server and (mostly) work in any
+DBMS. Writing SQL keywords in upper case is a readability convention; most DBMSs aren't case-sensitive about keywords.</p></div></details>
+</div><div class="q" id="q2">
+<div class="qhead"><span class="qnum">Q2</span><span class="tag">psql</span><span class="tag marks">8 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Say what each psql command does: <code>\l</code>, <code>\c todo_list testuser</code>, <code>\dt</code>, <code>\d todo_item</code>,
+<code>\d+ todo_item</code>, <code>\du</code>, <code>\dn</code>, <code>\x</code>, <code>\q</code>. How would you start psql connected to the
+<code>postgres</code> database?</p></div>
+<details><summary>Show answer</summary><div class="ans"><table class="t"><tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>psql postgres</code> / <code>psql -U postgres</code></td><td>start psql (from the terminal) on the <code>postgres</code> database / as user postgres</td></tr>
+<tr><td><code>\l</code></td><td>list all databases</td></tr>
+<tr><td><code>\c todo_list testuser</code></td><td>connect to database todo_list as user testuser</td></tr>
+<tr><td><code>\dt</code> (<code>\dt+</code>)</td><td>list tables (+ adds size and description)</td></tr>
+<tr><td><code>\d todo_item</code> (<code>\d+</code>)</td><td>describe a table: columns, types, nullability, indexes, FKs</td></tr>
+<tr><td><code>\du</code></td><td>list users/roles and their attributes</td></tr>
+<tr><td><code>\dn</code></td><td>list schemas (e.g. <code>public</code>)</td></tr>
+<tr><td><code>\x</code></td><td>toggle expanded display (one column per line, handy for wide rows)</td></tr>
+<tr><td><code>\q</code></td><td>quit psql</td></tr></table>
+<p>Real <code>\d todo_item</code> output on the practice database (shortened):</p><pre class="out"><code>            Table "public.todo_item"
+     Column      |  Type   | Collation | Nullable | Default
+-----------------+---------+-----------+----------+---------
+ todo_item_id    | integer |           | not null |
+ description     | text    |           |          |
+ owner_id        | integer |           |          |
+ ...
+ completion_date | date    |           |          |
+Indexes:
+    "todo_item_pkey" PRIMARY KEY, btree (todo_item_id)
+Foreign-key constraints:
+    "todo_item_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES app_user(user_id)
+    ...</code></pre><p>These all read the <b>DBMS catalog</b> from Week 1, the database the DBMS keeps about its own databases. The slides write <code>\ du</code>
+and <code>\ c</code> with a space; that's a font artefact. There's no space after the backslash.</p></div></details>
+</div><div class="q" id="q3">
+<div class="qhead"><span class="qnum">Q3</span><span class="tag">roles</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Write the lecture's command to create a user <code>testuser</code> with password <code>'password'</code> that can log in and doesn't
+inherit privileges. Explain <code>NOINHERIT</code>, <code>LOGIN</code> and <code>PASSWORD</code>. What does <code>\du</code> then show for it, and what
+do <code>SET ROLE</code> and <code>GRANT role_2 TO role_1</code> do?</p></div>
+<details><summary>Show answer</summary><div class="ans"><pre><code>CREATE ROLE testuser
+NOINHERIT LOGIN PASSWORD 'password';</code></pre><ul>
+<li><b>Role</b>: PostgreSQL's single concept for both users and groups. A role with <code>LOGIN</code> is effectively a user.</li>
+<li><code>LOGIN</code>: this role may connect. Without it, it's just a group of permissions.</li>
+<li><code>PASSWORD 'password'</code>: sets its password. <b>Single quotes</b>, since it's a string literal.</li>
+<li><code>NOINHERIT</code>: if testuser is made a member of another role, it does <b>not</b> automatically get that role's privileges;
+it must explicitly run <code>SET ROLE that_role;</code> to act with them.</li>
+<li><code>GRANT role_2 TO role_1;</code> makes role_1 a member of role_2.</li></ul><pre class="out"><code>                             List of roles
+ Role name |                         Attributes
+-----------+------------------------------------------------------------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS
+ testuser  | No inheritance</code></pre><p>As the lecture notes, the new testuser shows no attributes except “No inheritance”: it isn't a superuser and can't create databases or roles.
+Compare postgres, the superuser.</p></div></details>
+</div><div class="q" id="q4">
+<div class="qhead"><span class="qnum">Q4</span><span class="tag">CREATE DATABASE</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Write the lecture's statement creating database <code>todo_list</code> owned by <code>testuser</code>, UTF-8 encoded, with no connection limit,
+then connect to it as testuser. Explain <code>ENCODING</code> and <code>CONNECTION LIMIT = -1</code>, and why the owner matters.</p></div>
+<details><summary>Show answer</summary><div class="ans"><pre><code>CREATE DATABASE todo_list
+    WITH
+    OWNER = testuser
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1;
+
+\c todo_list testuser</code></pre><ul>
+<li><code>OWNER</code>: the owner can do almost anything with the database, which is why the lecture creates it for testuser rather than working as the superuser.</li>
+<li><code>ENCODING = 'UTF8'</code>: <b>UTF-8</b> is the character encoding that turns every character into bytes. It covers all languages and symbols,
+so “Zoë” or “€” store correctly.</li>
+<li><code>CONNECTION LIMIT = -1</code>: maximum simultaneous connections; −1 means no limit beyond the server's own.</li></ul>
+<p>I ran this on the practice server: <code>\l todo_list</code> then showed owner testuser and encoding UTF8. The first line is SQL (semicolon); the
+<code>\c</code> line is psql (backslash).</p></div></details>
+</div><div class="q" id="q5">
+<div class="qhead"><span class="qnum">Q5</span><span class="tag">permissions</span><span class="tag">security</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Why does the lecture warn against working as the <b>superuser</b>? (b) Write the commands to take away, then give back, testuser's
+permission to read <code>public.todo_item</code>. (c) What principle is this an example of? (d) On a newer PostgreSQL, creating a table as
+testuser gives “permission denied for schema public”. What fixes it?</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> A superuser has the highest level of access and can bypass all permission checks. Using it day to day is a security risk: one
+mistake, or one stolen password, can damage everything. So the lecture creates a separate user for a specific database.</p><pre><code>REVOKE SELECT ON public.todo_item FROM testuser;
+GRANT  SELECT ON public.todo_item TO   testuser;</code></pre><p><b>(c)</b> The <b>principle of least privilege</b>: give each user only the permissions they need (the slide's access-control picture of
+masked columns per user is the same idea).</p>
+<p><b>(d)</b> <code>GRANT CREATE ON SCHEMA public TO testuser;</code>. From PostgreSQL 15 onward, ordinary users no longer get CREATE on the
+<code>public</code> schema by default, so this grant is needed on 15+. (The slide's note says this “only works in 14 and below”. I believe it's
+the other way round, i.e. it's <i>needed</i> on 15+ and harmless on 14; worth checking on your install.)</p></div></details>
+</div><div class="q" id="q6">
+<div class="qhead"><span class="qnum">Q6</span><span class="tag mcq">multiple choice</span><span class="tag">schemas</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>In <code>public.todo_item</code>, what is <code>public</code>?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">A diagram of the tables</button><button class="opt" data-i="1" onclick="pick(this)">A named container of tables inside a database, used to organise them and control access</button><button class="opt" data-i="2" onclick="pick(this)">Another name for a database</button><button class="opt" data-i="3" onclick="pick(this)">A backup of a table</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> A PostgreSQL <b>schema</b> groups tables within one database: e.g. a management schema holding payroll tables and an employee
+schema with only daily-work tables, giving finer access control. <code>public</code> is the default schema, created automatically with every
+database. <code>public.todo_item</code> means “the todo_item table in schema public”; plain <code>todo_item</code> finds the same table. Note the two
+meanings of “schema”: Week 1's (the description/metadata of a database) and this one (a namespace).</p></div></details>
+</div><div class="q" id="q7">
+<div class="qhead"><span class="qnum">Q7</span><span class="tag">SQL injection</span><span class="tag">security</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>A Java login page builds its query like this:</p><pre><code>// username comes straight from a web form
+String query = "SELECT * FROM app_user WHERE username = '" + username + "'";
+ResultSet rs = statement.executeQuery(query);</code></pre><p>(a) What query runs if someone types <code>x' OR '1'='1</code> as the username, and what does it return? (b) Name three preventions from the lecture
+and rewrite the Java safely.</p></div>
+<details><summary>Show answer</summary><div class="ans"><p><b>(a)</b> The input's quote closes the string early, and the rest becomes SQL:</p><pre><code>SELECT * FROM app_user WHERE username = 'x' OR '1'='1'</code></pre><p><code>'1'='1'</code> is always true, so the WHERE is true for every row and the query returns <b>every user</b>. This is <b>SQL injection</b>:
+user input concatenated into a statement is interpreted as code, not data. Consequences on the slide: data leakage, tampering (insert/update/delete),
+even administrative control.</p>
+<p><b>(b)</b> Parameterised queries/prepared statements; input validation and sanitisation (allow-lists); principle of least privilege
+(so a compromised account can't do much).</p><pre><code>// The ? is a placeholder. The driver sends the value separately,
+// so it is always treated as data and can never change the query's structure.
+PreparedStatement ps = connection.prepareStatement(
+        "SELECT * FROM app_user WHERE username = ?");
+ps.setString(1, username);          // fill placeholder 1 with the input
+ResultSet rs = ps.executeQuery();</code></pre><div class="tip">Graph link: this is the same root bug as many attacks in Security and Networks: <b>mixing the control channel (code)
+with the data channel (input)</b>. Prepared statements separate them again.</div></div></details>
+</div><h2 class="sec">B. Creating tables and CRUD</h2><div class="q" id="q8">
+<div class="qhead"><span class="qnum">Q8</span><span class="tag">CREATE TABLE</span><span class="tag">data types</span><span class="tag marks">6 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Write <code>CREATE TABLE</code> for the lecture's <code>room</code> table (room_id like 'G0210', room_name, room_capacity, room_zoom) with
+room_id as primary key, insert the three rooms from the slide, and list rooms with Zoom that seat at least 50. The slide uses <code>text</code>
+for room_zoom with values 'yes', 'no', 'Yes'. What's the problem, and what type is better?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>CREATE TABLE public.room
+(
+    room_id       text NOT NULL,
+    room_name     text,
+    room_capacity integer,
+    room_zoom     boolean,
+    PRIMARY KEY (room_id)
+);
+
+INSERT INTO public.room VALUES
+    ('G0210', 'Seminar Room', 50,  true),
+    ('E1236', 'Lab',          40,  false),
+    ('G0205', 'Auditorium',   100, true);
+
+SELECT room_name, room_capacity
+FROM public.room
+WHERE room_zoom = true AND room_capacity &gt;= 50;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>INSERT 0 3
+  room_name   | room_capacity 
+--------------+---------------
+ Seminar Room |            50
+ Auditorium   |           100
+(2 rows)</code></pre><p>Column definition = name, data type, optional parameters (<code>NOT NULL</code> …). Column names follow Java-variable-like
+rules: no spaces, no special characters, can't start with a digit. <b>room_id is text</b> because 'G0210' contains letters; capacity is
+<code>integer</code>.</p>
+<p>Storing Zoom as text with values 'yes'/'Yes'/'no' is a Week 1 Guideline 1 problem (unclear semantics): <code>WHERE room_zoom = 'yes'</code>
+misses 'Yes'. A <code>boolean</code> allows only true/false (and NULL), so the query is unambiguous.</p></div></details>
+</div><div class="q" id="q9">
+<div class="qhead"><span class="qnum">Q9</span><span class="tag">constraints</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The slides say we need both <code>NOT NULL</code> and <code>PRIMARY KEY</code> on <code>todo_item_id</code>. Predict the result of each, then run them:</p><pre><code>INSERT INTO public.todo_item (todo_item_id, description) VALUES (1, 'Duplicate id');
+INSERT INTO public.todo_item (description) VALUES ('No id at all');</code></pre></div>
+<details><summary>Show answer</summary><div class="ans"><pre class="err"><code>ERROR:  duplicate key value violates unique constraint "todo_item_pkey"
+DETAIL:  Key (todo_item_id)=(1) already exists.</code></pre><pre class="err"><code>ERROR:  null value in column "todo_item_id" of relation "todo_item" violates not-null constraint
+DETAIL:  Failing row contains (null, No id at all, null, null, null, null, null, null, null).</code></pre><p>The first breaks <b>uniqueness</b> (id 1 exists), the second <b>NOT NULL</b> (no id given, so it's NULL). Together they're what a primary key
+means: never missing, never repeated (Week 1: PK = NOT NULL + UNIQUE). In PostgreSQL, <code>PRIMARY KEY</code> on its own already implies NOT NULL,
+so writing both is harmless but redundant. I'd still follow the slides' style in the test.</p></div></details>
+</div><div class="q" id="q10">
+<div class="qhead"><span class="qnum">Q10</span><span class="tag">INSERT</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Insert item 13 “Revise ACID properties” for user 2, High priority, @uni, To do, Databases project, due 13 Oct 2026, not completed, using
+the <b>positional</b> form (no column list). Then insert item 14 “Find pgAdmin password” for user 1, due 11 Oct, using an <b>explicit column list</b>
+and only the columns you need. What happens to the columns you leave out? What does <code>'2026-10-13'::date</code> do?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>INSERT INTO public.todo_item
+VALUES (13, 'Revise ACID properties', 2, 1, 1, 1, 1, '2026-10-13'::date, NULL);
+
+SELECT todo_item_id, description, due_date
+FROM public.todo_item
+WHERE todo_item_id = 13;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>INSERT 0 1
+ todo_item_id |      description       |  due_date  
+--------------+------------------------+------------
+           13 | Revise ACID properties | 2026-10-13
+(1 row)</code></pre><div class="label">Answer</div><pre><code>INSERT INTO public.todo_item (todo_item_id, description, owner_id, due_date)
+VALUES (14, 'Find pgAdmin password', 1, '2026-10-11');
+
+SELECT * FROM public.todo_item WHERE todo_item_id = 14;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>INSERT 0 1
+ todo_item_id |      description      | owner_id | priority_id | context_id | status_id | project_id |  due_date  | completion_date 
+--------------+-----------------------+----------+-------------+------------+-----------+------------+------------+-----------------
+           14 | Find pgAdmin password |        1 |             |            |           |            | 2026-10-11 | 
+(1 row)</code></pre><p>Positional form: values must be in the <b>same order as the table's columns</b>, and you must supply all of them.
+Explicit column list: you choose the order and can skip columns. Skipped columns get their DEFAULT, or NULL if there's none, as shown.
+The explicit form is safer: it still works if someone later adds or reorders columns.</p>
+<p><code>::date</code> is PostgreSQL's <b>cast</b> operator: convert this value to type date (standard SQL: <code>CAST('2026-10-13' AS date)</code>).
+It's optional here, since Postgres converts a well-formed string into a date column automatically, but the slides use it to make the intent explicit.
+<code>INSERT 0 1</code> means 1 row inserted.</p></div></details>
+</div><div class="q" id="q11">
+<div class="qhead"><span class="qnum">Q11</span><span class="tag">INSERT</span><span class="tag">cheat sheet</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Add two statuses, 4 “Blocked” and 5 “Cancelled”, in a <b>single</b> INSERT.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>INSERT INTO public.status (status_id, name)
+VALUES (4, 'Blocked'),
+       (5, 'Cancelled');
+
+SELECT * FROM public.status ORDER BY status_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>INSERT 0 2
+ status_id |    name     
+-----------+-------------
+         1 | To do
+         2 | In progress
+         3 | Done
+         4 | Blocked
+         5 | Cancelled
+(5 rows)</code></pre><p>Multi-row form from the cheat sheet: one <code>VALUES</code> list per row, separated by commas. It's one statement, so either both rows go in or neither does.</p></div></details>
+</div><div class="q" id="q12">
+<div class="qhead"><span class="qnum">Q12</span><span class="tag">INSERT</span><span class="tag">foreign keys</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>The lecture's first INSERT example is below. It worked in the lecture, but fails on the practice database. Why?</p><pre><code>INSERT INTO public.todo_item
+VALUES (0, 'New Task', 0, 0, 0, 0, 0, '2022-02-02'::date, NULL);</code></pre></div>
+<details><summary>Show answer</summary><div class="ans"><pre class="err"><code>ERROR:  insert or update on table "todo_item" violates foreign key constraint "todo_item_owner_id_fkey"
+DETAIL:  Key (owner_id)=(0) is not present in table "app_user".</code></pre><p>In the lecture, <code>todo_item</code> had no foreign keys yet, so any integer was accepted. Here, <code>owner_id</code>
+<b>REFERENCES</b> <code>app_user(user_id)</code>, and there's no user 0. <b>Referential integrity</b> stops a row pointing at something that doesn't
+exist. (Priority, context, status and project 0 would fail too; Postgres reports the first violation it finds.) This is the “links between tables”
+the FOREIGN KEY constraint protects.</p></div></details>
+</div><div class="q" id="q13">
+<div class="qhead"><span class="qnum">Q13</span><span class="tag">UPDATE</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Mark item 3 as done today: set its completion date to 11 Oct 2026 and its status to 3. Show the row, then undo the change.
+How would the lecture's version set “today” automatically?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>BEGIN;
+
+UPDATE public.todo_item
+SET completion_date = '2026-10-11', status_id = 3
+WHERE todo_item_id = 3;
+
+SELECT todo_item_id, description, status_id, completion_date
+FROM public.todo_item
+WHERE todo_item_id = 3;
+
+ROLLBACK;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>UPDATE 1
+ todo_item_id |     description      | status_id | completion_date 
+--------------+----------------------+-----------+-----------------
+            3 | Practice SQL queries |         3 | 2026-10-11
+(1 row)</code></pre><p>Structure: <code>UPDATE table SET column = value, … WHERE condition;</code>. The table, the columns, the new values, and <i>which rows</i>.
+The lecture writes <code>SET completion_date = now()</code>. <code>now()</code> is a built-in function returning the current date and time
+(stored in a date column, the time part is dropped; <code>CURRENT_DATE</code> gives just the date).</p>
+<p><code>BEGIN</code> starts a <b>transaction</b>; <code>ROLLBACK</code> undoes everything since; <code>COMMIT</code> would keep it. These are
+Week 1's ACID transactions, live. pgAdmin auto-commits each statement unless you use BEGIN.</p></div></details>
+</div><div class="q" id="q14">
+<div class="qhead"><span class="qnum">Q14</span><span class="tag">UPDATE</span><span class="tag">trap</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Predict how many rows this changes, then run it (it's safely wrapped):</p><pre><code>UPDATE public.todo_item
+SET completion_date = now();</code></pre></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>BEGIN;
+
+UPDATE public.todo_item
+SET completion_date = now();
+
+SELECT COUNT(*) AS rows_marked_complete
+FROM public.todo_item
+WHERE completion_date IS NOT NULL;
+
+ROLLBACK;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>UPDATE 12
+ rows_marked_complete 
+----------------------
+                   12
+(1 row)</code></pre><p><b>All 12.</b> No <code>WHERE</code> means every row. It's the most common destructive mistake in SQL, and the reason to try risky updates inside <code>BEGIN … ROLLBACK</code> first.</p></div></details>
+</div><div class="q" id="q15">
+<div class="qhead"><span class="qnum">Q15</span><span class="tag">DELETE</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Delete every item completed before 5 Oct 2026 (in a rolled-back transaction) and show which completed items remain.
+(b) Then try <code>DELETE FROM public.priority WHERE priority_id = 1;</code> What happens and why?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>BEGIN;
+
+DELETE FROM public.todo_item
+WHERE completion_date &lt; '2026-10-05';
+
+SELECT todo_item_id, description, completion_date
+FROM public.todo_item
+WHERE completion_date IS NOT NULL
+ORDER BY todo_item_id;
+
+ROLLBACK;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>DELETE 3
+ todo_item_id |       description       | completion_date 
+--------------+-------------------------+-----------------
+           12 | Submit DB practice test | 2026-10-10
+(1 row)</code></pre><p>Items 1 (4 Oct), 6 (30 Sep) and 8 (2 Oct) go. <b>DELETE removes whole rows</b>, so you never name columns.
+<code>&lt;</code> on dates means “earlier than”. Rows with a NULL completion date aren't deleted: <code>NULL &lt; '2026-10-05'</code> is
+<i>unknown</i>, not true.</p><div class="label">(b)</div><pre class="err"><code>ERROR:  update or delete on table "priority" violates foreign key constraint "todo_item_priority_id_fkey" on table "todo_item"
+DETAIL:  Key (priority_id)=(1) is still referenced from table "todo_item".</code></pre><p>Items still reference priority 1 (High), so deleting it would leave them pointing at nothing. The foreign key blocks it (default behaviour,
+<code>NO ACTION</code>), and nothing is deleted.</p></div></details>
+</div><div class="q" id="q16">
+<div class="qhead"><span class="qnum">Q16</span><span class="tag mcq">multiple choice</span><span class="tag">DELETE</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>What does <code>DELETE FROM public.todo_item;</code> do?</p></div><div class="opts" data-c="1"><button class="opt" data-i="0" onclick="pick(this)">Deletes the todo_item table entirely</button><button class="opt" data-i="1" onclick="pick(this)">Deletes every row but keeps the (empty) table</button><button class="opt" data-i="2" onclick="pick(this)">Gives a syntax error because WHERE is required</button><button class="opt" data-i="3" onclick="pick(this)">Deletes only rows with NULLs</button></div>
+<details><summary>Explanation</summary><div class="ans"><p><b>Answer:</b> The slide's warning: without a WHERE clause, DELETE removes <b>all the rows</b>. The table and its structure remain.
+<code>DROP TABLE todo_item;</code> is what removes the table itself (section E).</p></div></details>
+</div><h2 class="sec">C. Querying one table</h2><div class="q" id="q17">
+<div class="qhead"><span class="qnum">Q17</span><span class="tag">SELECT</span><span class="tag">AS</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Show user 1's items as two columns headed <code>task</code> and <code>deadline</code>, soonest first. Where does the item with no due date end up?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT description AS task, due_date AS deadline
+FROM public.todo_item
+WHERE owner_id = 1
+ORDER BY due_date;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>         task         |  deadline  
+----------------------+------------
+ Cancel old broadband | 2026-10-01
+ Book removal van     | 2026-10-20
+ Renew railcard       | 
+(3 rows)</code></pre><p><code>AS</code> renames a column in the <i>result only</i>; the table isn't changed. In ascending order PostgreSQL puts NULLs <b>last</b>
+(<code>NULLS FIRST</code> would override).</p></div></details>
+</div><div class="q" id="q18">
+<div class="qhead"><span class="qnum">Q18</span><span class="tag">DISTINCT</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Which users own at least one item? Each user once.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT DISTINCT owner_id
+FROM public.todo_item
+ORDER BY owner_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> owner_id 
+----------
+        1
+        2
+        3
+(3 rows)</code></pre><p><code>DISTINCT</code> removes duplicate rows from the result. Without it you'd get 12 rows, one per item. Chloe (4) doesn't appear: she has no items.</p></div></details>
+</div><div class="q" id="q19">
+<div class="qhead"><span class="qnum">Q19</span><span class="tag">IN</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>List items whose context is @home (2) or @phone (3), using <code>IN</code>.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT todo_item_id, description, context_id
+FROM public.todo_item
+WHERE context_id IN (2, 3)
+ORDER BY todo_item_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |       description       | context_id 
+--------------+-------------------------+------------
+            4 | Book removal van        |          3
+            5 | Pack kitchen            |          2
+            6 | Cancel old broadband    |          3
+            9 | Email tutor about essay |          3
+(4 rows)</code></pre><p><code>col IN (2, 3)</code> is shorthand for <code>col = 2 OR col = 3</code>. Items with a NULL context are never matched.</p></div></details>
+</div><div class="q" id="q20">
+<div class="qhead"><span class="qnum">Q20</span><span class="tag">LIKE</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Find items whose description contains “essay”. (b) Find items whose description starts with “E”. (c) Would <code>LIKE '%Essay%'</code> find either essay item?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT todo_item_id, description
+FROM public.todo_item
+WHERE description LIKE '%essay%';</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |       description       
+--------------+-------------------------
+            9 | Email tutor about essay
+           10 | Write essay plan
+(2 rows)</code></pre><div class="label">Answer</div><pre><code>SELECT todo_item_id, description
+FROM public.todo_item
+WHERE description LIKE 'E%';</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |       description       
+--------------+-------------------------
+            7 | Erg 2k test
+            9 | Email tutor about essay
+(2 rows)</code></pre><p><code>%</code> matches any run of characters (including none); <code>_</code> matches exactly one.
+<code>'%essay%'</code> = contains; <code>'E%'</code> = starts with E. <b>(c) No</b>: <code>LIKE</code> is case-sensitive in PostgreSQL and both items
+have lower-case “essay”. Use <code>ILIKE</code> for case-insensitive matching.</p></div></details>
+</div><div class="q" id="q21">
+<div class="qhead"><span class="qnum">Q21</span><span class="tag">BETWEEN</span><span class="tag marks">2 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Items due from 12 to 20 October 2026 inclusive, in date order.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT description, due_date
+FROM public.todo_item
+WHERE due_date BETWEEN '2026-10-12' AND '2026-10-20'
+ORDER BY due_date;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>     description      |  due_date  
+----------------------+------------
+ Practice SQL queries | 2026-10-12
+ Write essay plan     | 2026-10-15
+ Erg 2k test          | 2026-10-18
+ Book removal van     | 2026-10-20
+(4 rows)</code></pre><p><code>BETWEEN low AND high</code> is <b>inclusive</b> at both ends (= <code>&gt;= low AND &lt;= high</code>): the 12th and 20th are both included.</p></div></details>
+</div><div class="q" id="q22">
+<div class="qhead"><span class="qnum">Q22</span><span class="tag">NULL</span><span class="tag">trap</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Find items that have <b>no due date and aren't completed</b>. Then explain why this returns nothing:</p><pre><code>SELECT todo_item_id, description
+FROM public.todo_item
+WHERE due_date = NULL;</code></pre></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT todo_item_id, description
+FROM public.todo_item
+WHERE completion_date IS NULL
+  AND due_date IS NULL;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |  description   
+--------------+----------------
+           11 | Renew railcard
+(1 row)</code></pre><pre class="out"><code> todo_item_id | description 
+--------------+-------------
+(0 rows)</code></pre><p>NULL means “unknown”, and any comparison with unknown is itself <b>unknown</b>, so <code>due_date = NULL</code> is never
+true, even for NULL dates. WHERE keeps only rows where the condition is true. Always use <code>IS NULL</code> / <code>IS NOT NULL</code>.
+(Week 1's Guideline 3 warned that NULLs “complicate” operations; this is what it meant.)</p></div></details>
+</div><div class="q" id="q23">
+<div class="qhead"><span class="qnum">Q23</span><span class="tag">ORDER BY</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>List unfinished items (status not 3) sorted by priority (High first), and within each priority by due date, <b>latest first</b>.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT priority_id, due_date, description
+FROM public.todo_item
+WHERE status_id &lt;&gt; 3
+ORDER BY priority_id ASC, due_date DESC;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> priority_id |  due_date  |       description       
+-------------+------------+-------------------------
+           1 | 2026-10-15 | Write essay plan
+           1 | 2026-10-12 | Practice SQL queries
+           1 | 2026-10-09 | Draw ER diagram in JDL
+           2 | 2026-10-20 | Book removal van
+           2 | 2026-10-18 | Erg 2k test
+           2 | 2026-10-08 | Email tutor about essay
+           3 |            | Renew railcard
+           3 | 2026-10-24 | Pack kitchen
+(8 rows)</code></pre><p>Each column in <code>ORDER BY</code> gets its own direction; later columns only break ties in earlier ones. <code>&lt;&gt;</code>
+means “not equal”. In <code>DESC</code> order, NULLs come <b>first</b> (the reverse of ASC), which is why “Renew railcard” leads the Low group.</p></div></details>
+</div><div class="q" id="q24">
+<div class="qhead"><span class="qnum">Q24</span><span class="tag">LIMIT/OFFSET</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Show the 4th–6th items by due date (page 2 of a list showing 3 per page), ignoring items without a due date. The cheat sheet writes this as <code>LIMIT … OFFSET … ORDER BY …</code>. Does that run?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT todo_item_id, description, due_date
+FROM public.todo_item
+WHERE due_date IS NOT NULL
+ORDER BY due_date
+LIMIT 3 OFFSET 3;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |       description       |  due_date  
+--------------+-------------------------+------------
+            2 | Draw ER diagram in JDL  | 2026-10-09
+           12 | Submit DB practice test | 2026-10-10
+            3 | Practice SQL queries    | 2026-10-12
+(3 rows)</code></pre><p><code>OFFSET 3</code> skips the first 3 rows; <code>LIMIT 3</code> then keeps the next 3. Order: <code>ORDER BY</code> first, then
+<code>LIMIT/OFFSET</code>. The cheat sheet's order is a <b>syntax error</b>. Without ORDER BY, “the first 3” is whatever order the DBMS happens to
+return: not guaranteed.</p></div></details>
+</div><div class="q" id="q25">
+<div class="qhead"><span class="qnum">Q25</span><span class="tag">COUNT</span><span class="tag">NULL</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>In one query: the total number of items, how many have a due date, and how many belong to a project.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT COUNT(*) AS total_items,
+       COUNT(due_date) AS items_with_due_date,
+       COUNT(project_id) AS items_in_a_project
+FROM public.todo_item;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> total_items | items_with_due_date | items_in_a_project 
+-------------+---------------------+--------------------
+          12 |                  10 |                  9
+(1 row)</code></pre><p><code>COUNT(*)</code> counts rows; <code>COUNT(column)</code> counts <b>non-NULL</b> values in that column. Two items have no due date; three have no project.</p></div></details>
+</div><div class="q" id="q26">
+<div class="qhead"><span class="qnum">Q26</span><span class="tag">GROUP BY</span><span class="tag">HAVING</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) How many items does each user own? (b) Which users have <b>at least 3 unfinished</b> items (no completion date)?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT owner_id, COUNT(*) AS num_items
+FROM public.todo_item
+GROUP BY owner_id
+ORDER BY owner_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> owner_id | num_items 
+----------+-----------
+        1 |         3
+        2 |         6
+        3 |         3
+(3 rows)</code></pre><div class="label">Answer</div><pre><code>SELECT owner_id, COUNT(*) AS open_items
+FROM public.todo_item
+WHERE completion_date IS NULL
+GROUP BY owner_id
+HAVING COUNT(*) &gt;= 3;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> owner_id | open_items 
+----------+------------
+        2 |          4
+(1 row)</code></pre><p><code>GROUP BY owner_id</code> makes one group per owner; <code>COUNT(*)</code> counts rows in each. Every column in the
+SELECT must be grouped or inside an aggregate.</p>
+<p><b>WHERE vs HAVING:</b> WHERE filters <b>rows</b> before grouping (only unfinished items); HAVING filters <b>groups</b> after (only groups with 3+).
+You can't write <code>WHERE COUNT(*) &gt;= 3</code>, since groups don't exist yet when WHERE runs. Order of evaluation:
+FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT.</p></div></details>
+</div><h2 class="sec">D. Joins and set operations</h2><div class="q" id="q27">
+<div class="qhead"><span class="qnum">Q27</span><span class="tag">INNER JOIN</span><span class="tag">cheat sheet</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>List Amira's (user 2) items with the <b>names</b> of their status and priority instead of the ids.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT t.description, s.name AS status, p.name AS priority
+FROM public.todo_item t
+INNER JOIN public.status   s ON t.status_id   = s.status_id
+INNER JOIN public.priority p ON t.priority_id = p.priority_id
+WHERE t.owner_id = 2
+ORDER BY t.todo_item_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>        description        |   status    | priority 
+---------------------------+-------------+----------
+ Read normalisation slides | Done        | High
+ Draw ER diagram in JDL    | In progress | High
+ Practice SQL queries      | To do       | High
+ Pack kitchen              | To do       | Low
+ Email tutor about essay   | To do       | Medium
+ Submit DB practice test   | Done        | High
+(6 rows)</code></pre><p><code>INNER JOIN t2 ON condition</code> pairs each row with every row of t2 where the condition is true. Here it's FK = PK, so each
+item finds its one status and one priority. <code>t</code>, <code>s</code>, <code>p</code> are <b>table aliases</b>, needed to say which table's column
+you mean. This is how the Week 2 normalised tables get “connected” back together.</p></div></details>
+</div><div class="q" id="q28">
+<div class="qhead"><span class="qnum">Q28</span><span class="tag">LEFT JOIN</span><span class="tag">cheat sheet</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) An inner join of todo_item to project gives how many rows, and why not 12? (b) Count the items in <b>every</b> project, including
+projects with none.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT COUNT(*) AS rows_after_inner_join
+FROM public.todo_item t
+INNER JOIN public.project pr ON t.project_id = pr.project_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> rows_after_inner_join 
+-----------------------
+                     9
+(1 row)</code></pre><p><b>(a)</b> 9: the three items with NULL <code>project_id</code> match no project, and an inner join drops unmatched rows.</p><div class="label">Answer</div><pre><code>SELECT pr.name AS project, COUNT(t.todo_item_id) AS num_items
+FROM public.project pr
+LEFT JOIN public.todo_item t ON t.project_id = pr.project_id
+GROUP BY pr.project_id, pr.name
+ORDER BY num_items DESC, pr.name;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>       project        | num_items 
+----------------------+-----------
+ Databases coursework |         4
+ Move flat            |         3
+ Rowing season        |         2
+ Learn Haskell        |         0
+(4 rows)</code></pre><p><b>(b)</b> <code>LEFT JOIN</code> keeps every row of the left table (project) even with no match, filling the right side with NULLs.
+Count <code>t.todo_item_id</code>, not <code>*</code>: for Learn Haskell the joined row has a NULL item id, so <code>COUNT(t.todo_item_id)</code> gives 0
+while <code>COUNT(*)</code> would wrongly give 1.</p></div></details>
+</div><div class="q" id="q29">
+<div class="qhead"><span class="qnum">Q29</span><span class="tag">FULL OUTER JOIN</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Using one <code>FULL OUTER JOIN</code>, find both items that belong to no project <i>and</i> projects that have no items.</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT t.description, pr.name AS project
+FROM public.todo_item t
+FULL OUTER JOIN public.project pr ON t.project_id = pr.project_id
+WHERE t.todo_item_id IS NULL OR pr.project_id IS NULL
+ORDER BY project, t.description;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>       description       |    project    
+-------------------------+---------------
+                         | Learn Haskell
+ Email tutor about essay | 
+ Renew railcard          | 
+ Write essay plan        | 
+(4 rows)</code></pre><p>A <b>FULL OUTER JOIN</b> keeps unmatched rows from <b>both</b> sides (LEFT keeps the left's, RIGHT the right's). Filtering for a NULL key
+on either side keeps only the orphans.</p></div></details>
+</div><div class="q" id="q30">
+<div class="qhead"><span class="qnum">Q30</span><span class="tag">CROSS JOIN</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>How many rows does <code>status CROSS JOIN priority</code> produce, and why? Which Week 1 idea is this?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT COUNT(*) AS cross_join_rows
+FROM public.status
+CROSS JOIN public.priority;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> cross_join_rows 
+-----------------
+               9
+(1 row)</code></pre><pre class="out"><code>   status    | priority 
+-------------+----------
+ To do       | High
+ To do       | Medium
+ To do       | Low
+ In progress | High
+ In progress | Medium
+ In progress | Low
+ Done        | High
+ Done        | Medium
+ Done        | Low
+(9 rows)</code></pre><p>A <b>CROSS JOIN</b> pairs every row of one table with every row of the other: 3 × 3 = 9. It's the Cartesian product
+<code>A × B</code> from Week 1's <b>spurious tuples</b> guideline. Joining with no (or the wrong) condition produces combinations that were never real.
+Useful occasionally (e.g. generating a grid of every status/priority pair), dangerous by accident.</p></div></details>
+</div><div class="q" id="q31">
+<div class="qhead"><span class="qnum">Q31</span><span class="tag">NATURAL JOIN</span><span class="tag">trap</span><span class="tag">cheat sheet</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Compare <code>todo_item NATURAL JOIN project</code> with an explicit inner join on <code>project_id</code>. They return different numbers of rows.
+Which item disappears from the NATURAL JOIN, and why?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT todo_item_id, description, name AS project
+FROM public.todo_item
+NATURAL JOIN public.project
+ORDER BY todo_item_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |        description        |       project        
+--------------+---------------------------+----------------------
+            1 | Read normalisation slides | Databases coursework
+            2 | Draw ER diagram in JDL    | Databases coursework
+            3 | Practice SQL queries      | Databases coursework
+            4 | Book removal van          | Move flat
+            6 | Cancel old broadband      | Move flat
+            7 | Erg 2k test               | Rowing season
+            8 | Buy heart rate strap      | Rowing season
+           12 | Submit DB practice test   | Databases coursework
+(8 rows)</code></pre><div class="label">Answer</div><pre><code>SELECT t.todo_item_id, t.description, pr.name AS project
+FROM public.todo_item t
+INNER JOIN public.project pr ON t.project_id = pr.project_id
+ORDER BY t.todo_item_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |        description        |       project        
+--------------+---------------------------+----------------------
+            1 | Read normalisation slides | Databases coursework
+            2 | Draw ER diagram in JDL    | Databases coursework
+            3 | Practice SQL queries      | Databases coursework
+            4 | Book removal van          | Move flat
+            5 | Pack kitchen              | Move flat
+            6 | Cancel old broadband      | Move flat
+            7 | Erg 2k test               | Rowing season
+            8 | Buy heart rate strap      | Rowing season
+           12 | Submit DB practice test   | Databases coursework
+(9 rows)</code></pre><p>The NATURAL JOIN gives 8 rows, the explicit join 9. <b>“Pack kitchen” (item 5) is missing.</b> A
+<code>NATURAL JOIN</code> joins on <b>every column with the same name</b> in both tables. Both have <code>project_id</code> <i>and</i>
+<code>owner_id</code>, so it silently requires the item's owner to equal the project's owner. Item 5 is Amira's item in Test User's project, so it's dropped.
+Explicit <code>JOIN … ON</code> says exactly what you mean.</p></div></details>
+</div><div class="q" id="q32">
+<div class="qhead"><span class="qnum">Q32</span><span class="tag">UNION</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) List every user who owns a project <b>or</b> an item, each once. (b) How many rows would <code>UNION ALL</code> give instead?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT owner_id AS user_id FROM public.project
+UNION
+SELECT owner_id FROM public.todo_item
+ORDER BY user_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> user_id 
+---------
+       1
+       2
+       3
+(3 rows)</code></pre><div class="label">Answer</div><pre><code>SELECT COUNT(*) AS union_all_rows
+FROM (
+    SELECT owner_id FROM public.project
+    UNION ALL
+    SELECT owner_id FROM public.todo_item
+) AS combined;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> union_all_rows 
+----------------
+             16
+(1 row)</code></pre><p><b>Set operations</b> combine the results of two SELECTs with the same number and types of columns.
+<code>UNION</code> removes duplicates; <code>UNION ALL</code> keeps them (4 projects + 12 items = 16 rows). The column name comes from the first
+SELECT, hence the alias there.</p></div></details>
+</div><div class="q" id="q33">
+<div class="qhead"><span class="qnum">Q33</span><span class="tag">INTERSECT</span><span class="tag">EXCEPT</span><span class="tag">cheat sheet</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>(a) Which contexts are used by <b>both</b> Amira (2) and Ben (3)? (b) Which does Amira use that Ben doesn't? (c) Which users own no items at all?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>SELECT c.name AS context
+FROM public.todo_item t JOIN public.context c ON c.context_id = t.context_id
+WHERE t.owner_id = 2
+INTERSECT
+SELECT c.name
+FROM public.todo_item t JOIN public.context c ON c.context_id = t.context_id
+WHERE t.owner_id = 3;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> context 
+---------
+ @uni
+(1 row)</code></pre><div class="label">Answer</div><pre><code>SELECT c.name AS context
+FROM public.todo_item t JOIN public.context c ON c.context_id = t.context_id
+WHERE t.owner_id = 2
+EXCEPT
+SELECT c.name
+FROM public.todo_item t JOIN public.context c ON c.context_id = t.context_id
+WHERE t.owner_id = 3
+ORDER BY context;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> context 
+---------
+ @home
+ @phone
+(2 rows)</code></pre><div class="label">Answer</div><pre><code>SELECT user_id FROM public.app_user
+EXCEPT
+SELECT owner_id FROM public.todo_item
+ORDER BY user_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> user_id 
+---------
+       4
+(1 row)</code></pre><p><code>INTERSECT</code> = rows in both results; <code>EXCEPT</code> = rows in the first but not the second (order matters).
+(c) is the “find what's missing” pattern: all users EXCEPT users who own items leaves Chloe. Ben's NULL context doesn't match anything, and neither
+does his @gym.</p></div></details>
+</div><h2 class="sec">E. Changing structure, views and indexes</h2><div class="q" id="q34">
+<div class="qhead"><span class="qnum">Q34</span><span class="tag">ALTER TABLE</span><span class="tag">cheat sheet</span><span class="tag marks">4 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Add an optional <code>notes</code> column to todo_item, and make new items default to status 1 (“To do”). Insert item 15 without giving a status
+and show it. Then rename context's <code>name</code> column to <code>label</code> and the table to <code>place</code>.
+(Re-run the setup script afterwards to reset.)</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>ALTER TABLE public.todo_item ADD COLUMN notes text;
+ALTER TABLE public.todo_item ALTER COLUMN status_id SET DEFAULT 1;
+
+INSERT INTO public.todo_item (todo_item_id, description, owner_id)
+VALUES (15, 'Try ALTER TABLE', 3);
+
+SELECT todo_item_id, description, status_id, notes
+FROM public.todo_item
+WHERE todo_item_id = 15;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>INSERT 0 1
+ todo_item_id |   description   | status_id | notes 
+--------------+-----------------+-----------+-------
+           15 | Try ALTER TABLE |         1 | 
+(1 row)</code></pre><p><code>ADD COLUMN</code> adds a column; existing rows get NULL. <code>ALTER COLUMN … SET DEFAULT</code> only affects <b>future</b>
+inserts, so item 15 gets status 1, which is the DEFAULT constraint from Week 1. Remove it with <code>DROP DEFAULT</code>; remove a column with
+<code>DROP COLUMN</code>.</p><div class="label">Answer</div><pre><code>ALTER TABLE public.context RENAME COLUMN name TO label;
+ALTER TABLE public.context RENAME TO place;
+
+SELECT * FROM public.place ORDER BY context_id;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> context_id | label  
+------------+--------
+          1 | @uni
+          2 | @home
+          3 | @phone
+          4 | @gym
+(4 rows)</code></pre><p>Renaming the table doesn't break the foreign key from todo_item: PostgreSQL's FKs refer to the table itself, not its name.
+(The setup script drops <code>place</code> too, so re-running it resets everything.)</p></div></details>
+</div><div class="q" id="q35">
+<div class="qhead"><span class="qnum">Q35</span><span class="tag">views</span><span class="tag">cheat sheet</span><span class="tag marks">5 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Create a view <code>overdue_items</code>: unfinished items due before 11 Oct 2026, with the owner's username. Query it. Then mark item 9 complete
+and query the view again. What changed and why?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>CREATE OR REPLACE VIEW overdue_items AS
+SELECT t.todo_item_id, t.description, u.username, t.due_date
+FROM public.todo_item t
+JOIN public.app_user u ON u.user_id = t.owner_id
+WHERE t.completion_date IS NULL
+  AND t.due_date &lt; '2026-10-11';
+
+SELECT * FROM overdue_items ORDER BY due_date;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code> todo_item_id |       description       | username |  due_date  
+--------------+-------------------------+----------+------------
+            9 | Email tutor about essay | amira    | 2026-10-08
+            2 | Draw ER diagram in JDL  | amira    | 2026-10-09
+(2 rows)</code></pre><div class="label">Answer</div><pre><code>CREATE OR REPLACE VIEW overdue_items AS
+SELECT t.todo_item_id, t.description, u.username, t.due_date
+FROM public.todo_item t
+JOIN public.app_user u ON u.user_id = t.owner_id
+WHERE t.completion_date IS NULL
+  AND t.due_date &lt; '2026-10-11';
+
+UPDATE public.todo_item SET completion_date = '2026-10-11' WHERE todo_item_id = 9;
+
+SELECT * FROM overdue_items;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>UPDATE 1
+ todo_item_id |      description       | username |  due_date  
+--------------+------------------------+----------+------------
+            2 | Draw ER diagram in JDL | amira    | 2026-10-09
+(1 row)</code></pre><p>A <b>view</b> is Week 1's “virtual table”: a stored <i>query</i>, not stored data. Every <code>SELECT</code> from it re-runs the
+query against the base tables, so the view is always up to date: completing item 9 removed it. <code>CREATE OR REPLACE VIEW</code> creates it or
+updates its definition. (The cheat sheet drops the word VIEW; it's required.) <code>CREATE MATERIALIZED VIEW</code> instead stores the result, and needs
+<code>REFRESH MATERIALIZED VIEW</code> to update.</p></div></details>
+</div><div class="q" id="q36">
+<div class="qhead"><span class="qnum">Q36</span><span class="tag">DROP TABLE</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>With the view from the last question in place, what happens on <code>DROP TABLE public.app_user;</code>? What would <code>DROP TABLE IF EXISTS public.app_user CASCADE;</code> do?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>CREATE OR REPLACE VIEW overdue_items AS
+SELECT t.todo_item_id, t.description, u.username, t.due_date
+FROM public.todo_item t
+JOIN public.app_user u ON u.user_id = t.owner_id
+WHERE t.completion_date IS NULL
+  AND t.due_date &lt; '2026-10-11';
+
+DROP TABLE public.app_user;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="err"><code>ERROR:  cannot drop table app_user because other objects depend on it
+DETAIL:  constraint project_owner_id_fkey on table project depends on table app_user
+constraint todo_item_owner_id_fkey on table todo_item depends on table app_user
+view overdue_items depends on table app_user
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.</code></pre><p>The drop is refused: two foreign keys and the view depend on app_user. <code>CASCADE</code> would drop the table <b>and</b> remove what
+depends on it: the view, and the FK constraints on project and todo_item (the constraints, not those tables' rows). <code>IF EXISTS</code> just
+avoids an error if the table isn't there, which is why the setup script uses both.</p></div></details>
+</div><div class="q" id="q37">
+<div class="qhead"><span class="qnum">Q37</span><span class="tag">indexes</span><span class="tag">EXPLAIN</span><span class="tag">cheat sheet</span><span class="tag marks">3 marks</span>
+<label class="tick"><input type="checkbox"> confident</label></div>
+<div class="prompt"><p>Create an index on todo_item's <code>owner_id</code> and use <code>EXPLAIN</code> to see how <code>WHERE owner_id = 2</code> is executed. Is the index used?</p></div>
+<details><summary>Show answer</summary><div class="ans"><div class="label">Answer</div><pre><code>CREATE INDEX idx_todo_owner ON public.todo_item (owner_id);
+
+EXPLAIN SELECT * FROM public.todo_item WHERE owner_id = 2;</code></pre><div class="label">Output (run on PostgreSQL 16)</div><pre class="out"><code>                        QUERY PLAN                        
+----------------------------------------------------------
+ Seq Scan on todo_item  (cost=0.00..1.15 rows=1 width=64)
+   Filter: (owner_id = 2)
+(2 rows)</code></pre><p>An <b>index</b> is a separate lookup structure (a B-tree, like a sorted map) that lets the DBMS find matching rows without reading the
+whole table, Week 1's CREATE INDEX constraint. <code>EXPLAIN</code> shows the plan without running the query; <code>EXPLAIN ANALYZE</code> runs it and
+reports real timings.</p>
+<p>Surprise: it says <b>Seq Scan</b> (read every row). With 12 rows, reading the whole table is cheaper than consulting an index, so the planner
+ignores it. On thousands of rows it would switch to an Index Scan. Indexes are physical design (Week 1 step 5): they change speed, never results.</p></div></details>
+</div>
+</div><script>
+const KEY = location.pathname + '::done';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function refresh(){const s=load();let n=0;
+ document.querySelectorAll('.q').forEach(q=>{const on=!!s[q.id];q.classList.toggle('done',on);
+  const cb=q.querySelector('.tick input');if(cb)cb.checked=on;if(on)n++;});
+ const p=document.querySelector('.prog');if(p)p.textContent=n+' / '+document.querySelectorAll('.q').length+' marked confident';}
+document.addEventListener('change',e=>{if(e.target.matches('.tick input')){const s=load();
+ const id=e.target.closest('.q').id;if(e.target.checked)s[id]=1;else delete s[id];save(s);refresh();}});
+function setAll(open){document.querySelectorAll('.q').forEach(q=>{if(open&&q.querySelector('.opts'))return;const d=q.querySelector('details');if(d)d.open=open;})}
+function resetTicks(){save({});refresh()}
+function copyPre(btn){const t=btn.parentElement.querySelector('pre').innerText;
+ navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1500)})}
+// Shuffle each question's options on every load (Fisher-Yates), so answer position can't be memorised.
+document.querySelectorAll('.opts').forEach(box=>{const o=[...box.children];
+ for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]];}
+ o.forEach(b=>box.appendChild(b));});
+function pick(btn){const box=btn.closest('.opts');const right=+box.dataset.c;
+ box.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(+b.dataset.i===right)b.classList.add('right');});
+ if(+btn.dataset.i!==right)btn.classList.add('wrong');
+ const d=btn.closest('.q').querySelector('details');if(d)d.open=true;}
+refresh();
+</script></body></html>
