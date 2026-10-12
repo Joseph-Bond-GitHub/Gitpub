@@ -6,13 +6,11 @@
     
 
 body{
-    background-color: darkslategray;
+    background-color: lightslategray;
     color: lightgrey;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
 }
 
-button{
-    background-color: lightgrey;
-    color: darkslategray;
-    border-radius: 10px;
+a{
+    color: darkgreen;
 }
