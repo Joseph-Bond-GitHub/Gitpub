@@ -1,5 +1,15 @@
 # Contributing
 
+When making changes:
+1. Switch to the main local branch `git switch main`
+2. Ensure your local main branch is up to date `git fetch` `git pull`. 
+3. Create a new branch off of main: 'your_name_feature_name' or switch to a pre-existing branch and ensure it is up to date (`git checkout -b 'your_name_feature_name' OR `git switch your_name_feature_name`) `git fetch` `git pull`
+4. If a new branch, set the upstream branch. (`git push -u origin branch_name`). This is a cold push (a push with no changes)
+5. `git branch -r` to check the remote branch now exists. `git branch -vv` to check relationship between local branch and remote brancg
+6. Make changes on this new branch, regularly committing along the way to implementing the feature. 
+7. When ready to push the feature, `git push`, this will push your local changes on this branch to the remote branch
+8. Then create a pull request through the GitHub web interface. This request must be approved by at least one other collaborator 
+ 
 The following is a guide on how to structure commits and other contributions to the project. It was created with the help of online sources and AI. 
 
 This is currently a solo learning project, but these conventions exist so the
