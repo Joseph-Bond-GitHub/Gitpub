@@ -14,3 +14,21 @@ body{
 a{
     color: darkgreen;
 }
+
+button{
+    background-color: darkgreen;
+    color: lightgrey;
+    border-radius: 20px;
+    width: 100%;
+    min-height: 80px;
+    padding: 15px;
+    font-size: clamp(14px, 1.5vw, 20px);
+}
+
+#main_page_buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    width: 90%;
+    margin: auto;
+}

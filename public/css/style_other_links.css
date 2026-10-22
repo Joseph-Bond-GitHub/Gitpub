@@ -1,0 +1,15 @@
+header{
+    text-align: center;
+    font-size: 5vw;
+}
+    
+
+body{
+    background-color: lightslategray;
+    color: lightgrey;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+
+a{
+    color: darkgreen;
+}
