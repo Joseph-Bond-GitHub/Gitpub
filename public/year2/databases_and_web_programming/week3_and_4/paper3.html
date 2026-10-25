@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gitpub - Database Practice Paper 3</title>
+<style>
+:root{--bg:#111114;--panel:#1b1b20;--border:#36363d;--text:#f4f4f5;--muted:#a1a1aa;--blue:#60a5fa;--green:#4ade80;--red:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 Arial,sans-serif}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:22px}
+.container{max-width:950px;margin:auto;padding:20px}
+h1{margin:0}h2{color:var(--blue)}
+.muted{color:var(--muted)}
+.info{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;background:var(--panel);padding:18px;border:1px solid var(--border);border-radius:9px;margin-bottom:22px}
+#timer{font-size:24px;font-weight:bold;color:var(--blue)}
+.question{background:var(--panel);padding:22px;border:1px solid var(--border);border-radius:9px;margin:18px 0}
+.question h3{margin-top:0;font-size:17px}
+.options{display:grid;gap:9px}
+.option{display:flex;align-items:flex-start;gap:10px;background:#25252b;padding:12px;border:1px solid var(--border);border-radius:7px;cursor:pointer}
+.option:hover{border-color:var(--blue)}
+.option input{accent-color:var(--blue);margin-top:5px}
+.database-link{display:inline-block;margin:8px 0;padding:10px 15px;border-radius:7px;background:#23334b;color:#93c5fd;text-decoration:none;font-weight:bold}
+.database-link:hover{background:#304563}
+.answer{background:#141417;color:white;padding:12px;border:1px solid #52525b;border-radius:7px;font-size:17px;width:240px;max-width:100%}
+button{background:var(--blue);color:#111827;padding:13px 22px;border:none;border-radius:7px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.feedback{background:#25252b;margin-top:13px;padding:12px;border-radius:7px}
+.correct{color:var(--green)}.incorrect{color:var(--red)}
+#results{display:none;border:1px solid var(--blue);background:var(--panel);padding:25px;border-radius:9px;margin:25px 0}
+#score{font-size:34px;color:var(--blue)}
+footer{text-align:center;color:var(--muted);padding:25px}
+@media(max-width:600px){.container{padding:12px}.question{padding:15px}}
+</style>
+</head>
+<body>
+<header><div class="container">
+<h1>Database Practice Paper 3</h1>
+<p class="muted">Databases &amp; Web Programming | Weeks 1-4</p>
+</div></header>
+
+<main class="container">
+<div class="info">
+<div><strong>20 questions</strong><div class="muted">1 mark each</div></div>
+<div><strong>13 Theory + 7 SQL</strong><div class="muted">Auto-marked</div></div>
+<div><strong>Time remaining</strong><div id="timer">30:00</div></div>
+</div>
+
+<p class="muted">For Questions 14-20, open the SQL Playground in a new tab, select the specified database and run your queries. Enter the requested numerical result here.</p>
+
+<h2>Section A: Theory (13 marks)</h2>
+<div id="theory"></div>
+
+<h2>Section B: Practical SQL (7 marks)</h2>
+<div id="practical"></div>
+
+<button id="submit">Submit and Mark Paper</button>
+<div id="results" aria-live="polite">
+<h2>Your Results</h2>
+<div id="score"></div>
+<p id="message"></p>
+<p>Review the explanations under each question.</p>
+<button onclick="location.reload()">Try Again</button>
+</div>
+</main>
+<footer>Gitpub - Database Revision</footer>
+
+<script>
+"use strict";
+
+const PLAYGROUND="../../../data/playground.html";
+
+const theory=[
+{
+q:"Which statement best describes a database transaction?",
+o:["A single SELECT statement only","A unit of work that can be committed or rolled back","A replacement for a primary key","A file used to store CSS"],
+a:1,
+e:"A transaction groups database operations into a logical unit of work."
+},
+{
+q:"What does ROLLBACK normally do to uncommitted changes in the current transaction?",
+o:["Makes them permanent","Undoes the changes","Deletes the entire database","Creates a new table"],
+a:1,
+e:"ROLLBACK abandons the transaction's uncommitted changes."
+},
+{
+q:"Which SQL condition correctly checks for a NULL value?",
+o:["column = NULL","column == NULL","column IS NULL","column EQUALS NULL"],
+a:2,
+e:"NULL is tested with IS NULL or IS NOT NULL, rather than ordinary equality."
+},
+{
+q:"What happens when COUNT(*) is used on a table containing NULL column values?",
+o:["Rows containing any NULL value are ignored","Every row is counted","PostgreSQL raises an error","Only the primary key is counted"],
+a:1,
+e:"COUNT(*) counts rows regardless of NULL values in individual columns."
+},
+{
+q:"Which JOIN produces all combinations of rows from two tables?",
+o:["INNER JOIN","LEFT JOIN","CROSS JOIN","RIGHT JOIN"],
+a:2,
+e:"CROSS JOIN produces the Cartesian product of the two inputs."
+},
+{
+q:"What is the main difference between WHERE and HAVING?",
+o:["WHERE filters rows before grouping; HAVING filters groups after grouping","HAVING can only be used with DELETE","WHERE always runs after HAVING","There is no difference"],
+a:0,
+e:"WHERE determines which rows enter aggregation; HAVING filters the grouped result."
+},
+{
+q:"In a JPA entity, which annotation identifies the primary-key property?",
+o:["@Column","@Table","@Id","@GeneratedValue"],
+a:2,
+e:"@Id marks the entity identifier. @GeneratedValue can additionally configure identifier generation."
+},
+{
+q:"In JPA, what is the purpose of @OneToMany?",
+o:["To define a one-to-many relationship between entities","To declare a SQL view","To mark a field as a database password","To create a new transaction"],
+a:0,
+e:"@OneToMany describes an association where one entity relates to multiple entities."
+},
+{
+q:"Which statement about JPQL is correct?",
+o:["It queries Java entity types and their properties","It only works on raw CSV files","It uses CSS selectors","It cannot contain a WHERE clause"],
+a:0,
+e:"JPQL operates on entities and mapped properties instead of directly using table and column names."
+},
+{
+q:"What is Hibernate in a typical Spring Data JPA application?",
+o:["A JavaScript browser editor","A common implementation of JPA","A PostgreSQL database server","A replacement for Java"],
+a:1,
+e:"Hibernate is an ORM framework and a widely used JPA implementation."
+},
+{
+q:"What does the JPA persistence context do?",
+o:["Tracks managed entity instances and their state","Stores website images","Runs CSS animations","Only manages JDBC passwords"],
+a:0,
+e:"The persistence context manages entity identity, state and change tracking."
+},
+{
+q:"Which problem can occur when an entity accesses a lazy-loaded association after its persistence context has closed?",
+o:["An automatic PRIMARY KEY violation","A lazy initialisation error","Every row becomes NULL","The schema is dropped"],
+a:1,
+e:"Lazy associations may require an active persistence context to load their contents."
+},
+{
+q:"Why are Liquibase changesets useful?",
+o:["They provide a tracked sequence of database schema changes","They automatically create HTML exam papers","They replace every SQL constraint","They prevent any data modification"],
+a:0,
+e:"Changesets allow database schema migrations to be tracked and applied systematically."
+}
+];
+
+const practical=[
+{
+db:"university",
+q:"Use COUNT(mark) to find how many enrolment records have a non-NULL mark. Then compare it with COUNT(*). How many records have a non-NULL mark?",
+a:57,
+e:"SELECT COUNT(mark) FROM enrolments; returns 57. The remaining 11 enrolment records have NULL marks."
+},
+{
+db:"shop",
+q:"Use SUM(quantity) to find the total quantity of products on order_id = 1. What is the total quantity?",
+a:5,
+e:"SELECT SUM(quantity) FROM order_items WHERE order_id=1; returns 5."
+},
+{
+db:"cinema",
+q:"Use GROUP BY or a filtered COUNT(*) to determine how many tickets have status = 'Valid'.",
+a:78,
+e:"SELECT COUNT(*) FROM tickets WHERE status='Valid'; returns 78."
+},
+{
+db:"books",
+q:"Use WHERE and COUNT(*) to determine how many books were published in 1954. How many matching records are there?",
+a:2,
+e:"SELECT COUNT(*) FROM books WHERE publication_year=1954; returns 2."
+},
+{
+db:"shop",
+q:"Use PREPARE and EXECUTE to count products whose price is greater than a supplied parameter. Execute with a threshold of 300. How many products cost more than 300?",
+a:2,
+e:"PREPARE expensive_products(NUMERIC) AS SELECT COUNT(*) FROM products WHERE price>$1; EXECUTE expensive_products(300); returns 2."
+},
+{
+db:"university",
+q:"Use ALTER TABLE to add a nullable nickname TEXT column to students. UPDATE the nickname of student_id = 1 to 'Amy'. How many students still have nickname IS NULL?",
+a:29,
+e:"ALTER TABLE students ADD COLUMN nickname TEXT; UPDATE students SET nickname='Amy' WHERE student_id=1; SELECT COUNT(*) FROM students WHERE nickname IS NULL; returns 29."
+},
+{
+db:"cinema",
+q:"Create a temporary table named practice_counter containing an INTEGER column called value. Use a PostgreSQL DO block with a FOR loop to INSERT the integers 1, 2 and 3. After the block, what does COUNT(*) return?",
+a:3,
+e:"A successful DO block inserting three rows produces COUNT(*) = 3."
+}
+];
+
+function build(){
+theory.forEach((q,i)=>{
+const box=document.createElement("section");
+box.className="question";box.id="q"+i;
+const h=document.createElement("h3");h.textContent=`Question ${i+1}: ${q.q}`;box.append(h);
+const opts=document.createElement("div");opts.className="options";
+q.o.forEach((value,j)=>{
+const label=document.createElement("label");label.className="option";
+const input=document.createElement("input");
+input.type="radio";input.name="answer"+i;input.value=j;
+const text=document.createElement("span");text.textContent=value;
+label.append(input,text);opts.append(label);
+});
+box.append(opts);document.getElementById("theory").append(box);
+});
+practical.forEach((q,i)=>{
+const box=document.createElement("section");box.className="question";box.id="q"+(i+13);
+const h=document.createElement("h3");h.textContent=`Question ${i+14}: Practical SQL`;
+const p=document.createElement("p");p.textContent=q.q;
+const link=document.createElement("a");
+link.className="database-link";link.href=PLAYGROUND;link.target="_blank";link.rel="noopener noreferrer";
+link.textContent=`Open SQL Playground - select ${q.db} ↗`;
+const note=document.createElement("p");note.className="muted";
+note.textContent=`Use the ${q.db} database. Add your SQL at the end of the existing script.`;
+const label=document.createElement("label");label.textContent="Numerical result: ";label.htmlFor="numeric"+i;
+const input=document.createElement("input");input.className="answer";input.id="numeric"+i;input.type="number";input.step="any";
+box.append(h,p,link,note,label,input);document.getElementById("practical").append(box);
+});
+}
+
+let remaining=1800,submitted=false;
+function feedback(id,ok,explanation){
+const b=document.createElement("div");b.className="feedback";
+const strong=document.createElement("strong");strong.className=ok?"correct":"incorrect";
+strong.textContent=ok?"Correct - 1 mark":"Incorrect - 0 marks";
+const p=document.createElement("p");p.textContent=explanation;b.append(strong,p);
+document.getElementById("q"+id).append(b);
+}
+function submit(){
+if(submitted)return;submitted=true;
+let score=0;
+theory.forEach((q,i)=>{
+const selected=document.querySelector(`input[name="answer${i}"]:checked`);
+const ok=selected!==null&&Number(selected.value)===q.a;
+if(ok)score++;
+feedback(i,ok,`Correct answer: ${q.o[q.a]}. ${q.e}`);
+});
+practical.forEach((q,i)=>{
+const raw=document.getElementById("numeric"+i).value.trim();
+const ok=raw!==""&&Math.abs(Number(raw)-q.a)<0.000001;
+if(ok)score++;
+feedback(i+13,ok,`Expected answer: ${q.a}. ${q.e}`);
+});
+document.querySelectorAll('input').forEach(x=>x.disabled=true);
+document.getElementById("submit").disabled=true;
+document.getElementById("score").textContent=`${score} / 20`;
+document.getElementById("message").textContent=score>=16?"Excellent work!":score>=12?"Good progress. Review your missed questions.":"Review the explanations and try again.";
+document.getElementById("results").style.display="block";
+document.getElementById("results").scrollIntoView({behavior:"smooth"});
+}
+function clock(){
+document.getElementById("timer").textContent=
+String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0");
+}
+build();clock();
+document.getElementById("submit").addEventListener("click",submit);
+const interval=setInterval(()=>{
+if(submitted){clearInterval(interval);return;}
+remaining--;clock();
+if(remaining<=0){clearInterval(interval);submit();}
+},1000);
+</script>
+</body>
+</html>

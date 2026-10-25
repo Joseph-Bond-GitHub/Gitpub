@@ -1,0 +1,721 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gitpub - Database Practice Paper 1</title>
+
+<style>
+:root {
+    --bg: #111114;
+    --panel: #1b1b20;
+    --border: #36363d;
+    --text: #f4f4f5;
+    --muted: #a1a1aa;
+    --blue: #60a5fa;
+    --green: #4ade80;
+    --red: #f87171;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 24px;
+}
+
+.container {
+    max-width: 950px;
+    margin: auto;
+    padding: 24px;
+}
+
+h1 { margin: 0; }
+h2 { color: var(--blue); }
+
+.subtitle { color: var(--muted); }
+
+.exam-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+#timer {
+    color: var(--blue);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.question {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+.question h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+}
+
+.options {
+    display: grid;
+    gap: 9px;
+    margin-top: 15px;
+}
+
+.option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: #242429;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.option:hover {
+    border-color: var(--blue);
+}
+
+.option input {
+    margin-top: 5px;
+    accent-color: var(--blue);
+}
+
+.description {
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+code, pre {
+    font-family: Consolas, Monaco, monospace;
+}
+
+pre {
+    background: #141417;
+    padding: 16px;
+    overflow-x: auto;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    color: #93c5fd;
+    white-space: pre-wrap;
+}
+
+.database-link {
+    display: inline-block;
+    background: #23334b;
+    color: #93c5fd;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 7px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.database-link:hover {
+    background: #304563;
+}
+
+.answer-input {
+    width: 100%;
+    max-width: 260px;
+    background: #141417;
+    color: white;
+    border: 1px solid #52525b;
+    border-radius: 7px;
+    padding: 13px;
+    font-size: 17px;
+}
+
+.answer-input:focus {
+    outline: 2px solid var(--blue);
+}
+
+button {
+    background: var(--blue);
+    color: #111827;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedback {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 7px;
+    background: #242429;
+}
+
+.correct { color: var(--green); }
+.incorrect { color: var(--red); }
+
+#results {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--blue);
+    border-radius: 10px;
+    padding: 25px;
+    margin: 25px 0;
+}
+
+#score {
+    font-size: 34px;
+    color: var(--blue);
+}
+
+footer {
+    padding: 30px;
+    text-align: center;
+    color: var(--muted);
+}
+
+@media(max-width: 600px) {
+    .container { padding: 12px; }
+    .question { padding: 16px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="container">
+        <h1>Database Practice Paper 1</h1>
+        <p class="subtitle">
+            Databases & Web Programming | Weeks 1-4
+        </p>
+    </div>
+</header>
+
+<main class="container">
+
+<div class="exam-info">
+    <div>
+        <strong>20 questions</strong><br>
+        <span class="subtitle">1 mark per question</span>
+    </div>
+    <div>
+        <strong>Sections</strong><br>
+        <span class="subtitle">13 theory + 7 SQL</span>
+    </div>
+    <div>
+        <strong>Time remaining</strong><br>
+        <span id="timer">30:00</span>
+    </div>
+</div>
+
+<p class="description">
+    Answer all 20 questions. For Questions 14-20, open the
+    linked SQL Playground in a new tab, select the specified
+    database and run your SQL. Enter the requested numerical
+    result in this paper. You may edit the SQL files in the
+    playground without affecting the originals.
+</p>
+
+<h2>Section A: Database Theory (13 marks)</h2>
+<div id="theory-questions"></div>
+
+<h2>Section B: Practical SQL (7 marks)</h2>
+<p class="description">
+    Write and run the required SQL in the playground.
+    The instructions describe what your query must do.
+    Results should be entered as numbers only.
+</p>
+<div id="sql-questions"></div>
+
+<button id="submit-btn" type="button">
+    Submit and Mark Paper
+</button>
+
+<div id="results" aria-live="polite">
+    <h2>Exam Results</h2>
+    <div id="score"></div>
+    <p id="score-message"></p>
+    <p>Review the explanations underneath each question.</p>
+    <button type="button" onclick="location.reload()">
+        Try Again
+    </button>
+</div>
+
+</main>
+
+<footer>
+    Gitpub - Databases & Web Programming Revision
+</footer>
+
+<script>
+"use strict";
+
+const PLAYGROUND = "../../../data/playground.html";
+
+const theoryQuestions = [
+    {
+        text: "Which situation violates Second Normal Form (2NF)?",
+        options: [
+            "A non-key attribute depends on only part of a composite primary key",
+            "A table has a single-column primary key",
+            "A table has two foreign keys",
+            "A table contains a NULL value"
+        ],
+        answer: 0,
+        explanation:
+            "2NF requires non-key attributes to depend on the whole candidate key, not just part of a composite key."
+    },
+    {
+        text: "A student table stores student_id, program_id and program_name. Each program_id determines program_name. What is the main normalisation issue?",
+        options: [
+            "A violation of 1NF",
+            "A transitive dependency that may violate 3NF",
+            "A missing composite primary key",
+            "A many-to-many relationship"
+        ],
+        answer: 1,
+        explanation:
+            "student_id determines program_id, which determines program_name. Moving program details into a separate table removes the transitive dependency."
+    },
+    {
+        text: "In JHipster Domain Language (JDL), which relationship is appropriate when one lecturer can teach many modules but each module has one lecturer?",
+        options: [
+            "OneToOne",
+            "ManyToMany",
+            "OneToMany",
+            "No relationship is needed"
+        ],
+        answer: 2,
+        explanation:
+            "A lecturer-to-modules relationship is one-to-many."
+    },
+    {
+        text: "Which SQL constraint prevents a column from accepting NULL values?",
+        options: [
+            "UNIQUE",
+            "NOT NULL",
+            "DEFAULT",
+            "FOREIGN KEY"
+        ],
+        answer: 1,
+        explanation:
+            "NOT NULL requires every row to have a non-NULL value in that column."
+    },
+    {
+        text: "A table has 12 rows, but 4 values in the mark column are NULL. What does COUNT(mark) return?",
+        options: ["12", "4", "8", "0"],
+        answer: 2,
+        explanation:
+            "COUNT(column) ignores NULL values, while COUNT(*) counts all rows."
+    },
+    {
+        text: "Which clause filters groups after GROUP BY and aggregate functions are applied?",
+        options: ["WHERE", "ORDER BY", "HAVING", "LIMIT"],
+        answer: 2,
+        explanation:
+            "HAVING filters grouped results. WHERE filters individual rows before grouping."
+    },
+    {
+        text: "A LEFT JOIN combines students with enrolments. What happens to students who have no enrolments?",
+        options: [
+            "They are automatically deleted",
+            "They appear with NULL values for the enrolment columns",
+            "They are excluded",
+            "PostgreSQL reports an error"
+        ],
+        answer: 1,
+        explanation:
+            "LEFT JOIN keeps all rows from the left table, including those with no matching right-hand row."
+    },
+    {
+        text: "What does FULL OUTER JOIN return?",
+        options: [
+            "Only matching rows from both tables",
+            "Every combination of rows from both tables",
+            "All matching rows and all unmatched rows from either table",
+            "Only rows containing NULL"
+        ],
+        answer: 2,
+        explanation:
+            "FULL OUTER JOIN preserves unmatched rows from both sides, filling missing columns with NULL."
+    },
+    {
+        text: "Which statement about an ordinary SQL VIEW is correct?",
+        options: [
+            "It always stores a separate physical copy of its rows",
+            "It is defined by a saved query and can be queried like a table",
+            "It permanently deletes the source table",
+            "It can only contain one column"
+        ],
+        answer: 1,
+        explanation:
+            "A normal view stores a query definition, not an independent copy of the query's result."
+    },
+    {
+        text: "Why might you use PREPARE and EXECUTE in PostgreSQL?",
+        options: [
+            "To define a parameterised statement and execute it with supplied values",
+            "To delete a table automatically",
+            "To convert all integers to strings",
+            "To create an EntityManager"
+        ],
+        answer: 0,
+        explanation:
+            "Prepared statements allow a SQL statement to be defined and executed with different parameter values."
+    },
+    {
+        text: "What is the main purpose of Object-Relational Mapping (ORM)?",
+        options: [
+            "To replace Java with SQL",
+            "To map relational data to objects in application code",
+            "To remove database constraints",
+            "To generate CSS from database tables"
+        ],
+        answer: 1,
+        explanation:
+            "ORM bridges the difference between object-oriented application code and relational tables."
+    },
+    {
+        text: "In JPA, what does mappedBy usually identify in a bidirectional relationship?",
+        options: [
+            "The database password",
+            "The column used as a primary key",
+            "The field on the owning side of the relationship",
+            "The name of a Liquibase changelog"
+        ],
+        answer: 2,
+        explanation:
+            "mappedBy names the relationship field on the owning side. The annotation appears on the inverse side."
+    },
+    {
+        text: "What is Liquibase primarily responsible for in a Java database application?",
+        options: [
+            "Rendering HTML pages",
+            "Tracking and applying database schema migrations",
+            "Providing SQL syntax highlighting",
+            "Replacing Java repositories"
+        ],
+        answer: 1,
+        explanation:
+            "Liquibase manages versioned schema changes through changelogs and changesets."
+    }
+];
+
+const sqlQuestions = [
+    {
+        database: "books",
+        text: "Using SELECT, WHERE and COUNT(*), determine how many records are in the books table. You should also experiment with ORDER BY and LIMIT to inspect the data.",
+        expected: 150,
+        explanation:
+            "SELECT COUNT(*) FROM books; returns 150."
+    },
+    {
+        database: "university",
+        text: "Group the enrolments by student_id using GROUP BY and HAVING. How many students have at least 3 enrolment records? Use COUNT(*) in your grouped query.",
+        expected: 4,
+        explanation:
+            "SELECT COUNT(*) FROM (SELECT student_id FROM enrolments GROUP BY student_id HAVING COUNT(*) >= 3) AS grouped_students; returns 4."
+    },
+    {
+        database: "shop",
+        text: "Use a LEFT JOIN between products and order_items, then IS NULL, to find products that have never appeared in an order. How many products have never been ordered?",
+        expected: 5,
+        explanation:
+            "SELECT COUNT(*) FROM products p LEFT JOIN order_items oi ON p.product_id = oi.product_id WHERE oi.item_id IS NULL; returns 5."
+    },
+    {
+        database: "cinema",
+        text: "Use SELECT, WHERE and COUNT(*) to find the total number of cancelled tickets. Then explore JOINs to see which films those cancelled tickets were for.",
+        expected: 2,
+        explanation:
+            "SELECT COUNT(*) FROM tickets WHERE status = 'Cancelled'; returns 2."
+    },
+    {
+        database: "books",
+        text: "Practise INSERT, UPDATE and DELETE. Add a new book with book_id 151, change the stock_quantity of book_id 1 to 99, and delete the new book. What stock_quantity does book_id 1 have afterwards?",
+        expected: 99,
+        explanation:
+            "UPDATE books SET stock_quantity = 99 WHERE book_id = 1; followed by SELECT stock_quantity FROM books WHERE book_id = 1; returns 99."
+    },
+    {
+        database: "shop",
+        text: "Create a VIEW called category_totals containing each product category and its COUNT(*) of products, grouped by category. Use PREPARE and EXECUTE with an integer parameter to count how many categories have at least 2 products. What is the result?",
+        expected: 8,
+        explanation:
+            "There are 8 categories with at least two products. The Bags and Displays categories have only one product each."
+    },
+    {
+        database: "university",
+        text: "Create a temporary table called practice_numbers with one INTEGER column. Use a PostgreSQL DO block containing a FOR loop to insert the integers 1 through 5. Then TRUNCATE practice_numbers and query COUNT(*). What is the final row count?",
+        expected: 0,
+        explanation:
+            "TRUNCATE removes all rows while retaining the table structure. COUNT(*) then returns 0."
+    }
+];
+
+let remainingSeconds = 30 * 60;
+let submitted = false;
+
+function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[character]));
+}
+
+function renderTheory() {
+    const container =
+        document.getElementById("theory-questions");
+
+    theoryQuestions.forEach((q, index) => {
+        const article = document.createElement("article");
+        article.className = "question";
+        article.id = "question-" + (index + 1);
+
+        const heading = document.createElement("h3");
+        heading.textContent =
+            "Question " + (index + 1) + " - " + q.text;
+        article.append(heading);
+
+        const options = document.createElement("div");
+        options.className = "options";
+
+        q.options.forEach((option, optionIndex) => {
+            const label = document.createElement("label");
+            label.className = "option";
+
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "q" + index;
+            input.value = String(optionIndex);
+
+            const span = document.createElement("span");
+            span.textContent = option;
+
+            label.append(input, span);
+            options.append(label);
+        });
+
+        article.append(options);
+        container.append(article);
+    });
+}
+
+function renderSQL() {
+    const container =
+        document.getElementById("sql-questions");
+
+    sqlQuestions.forEach((q, index) => {
+        const number = index + 14;
+
+        const article = document.createElement("article");
+        article.className = "question";
+        article.id = "question-" + number;
+
+        const heading = document.createElement("h3");
+        heading.textContent =
+            "Question " + number + " - Practical SQL";
+
+        const description = document.createElement("p");
+        description.textContent = q.text;
+
+        const link = document.createElement("a");
+        link.href = PLAYGROUND;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "database-link";
+        link.textContent =
+            "Open SQL Playground - select " +
+            q.database + " ↗";
+
+        const instruction = document.createElement("p");
+        instruction.className = "description";
+        instruction.textContent =
+            "Open the playground, choose the " +
+            q.database +
+            " database, add your SQL below the setup script, " +
+            "and run the entire script.";
+
+        const answerLabel = document.createElement("label");
+        answerLabel.htmlFor = "sql-answer-" + index;
+        answerLabel.textContent = "Your numerical answer:";
+
+        const answerWrapper = document.createElement("p");
+        const input = document.createElement("input");
+        input.id = "sql-answer-" + index;
+        input.className = "answer-input";
+        input.type = "number";
+        input.step = "any";
+        input.placeholder = "Enter number";
+        answerWrapper.append(input);
+
+        article.append(
+            heading,
+            description,
+            link,
+            instruction,
+            answerLabel,
+            answerWrapper
+        );
+
+        container.append(article);
+    });
+}
+
+function showFeedback(article, correct, explanation) {
+    const feedback = document.createElement("div");
+    feedback.className = "feedback";
+
+    const result = document.createElement("strong");
+    result.className = correct ? "correct" : "incorrect";
+    result.textContent =
+        correct ? "Correct - 1 mark" : "Incorrect - 0 marks";
+
+    const detail = document.createElement("p");
+    detail.textContent = explanation;
+
+    feedback.append(result, detail);
+    article.append(feedback);
+}
+
+function submitPaper() {
+    if (submitted) return;
+
+    submitted = true;
+    let score = 0;
+
+    theoryQuestions.forEach((q, index) => {
+        const selected = document.querySelector(
+            'input[name="q' + index + '"]:checked'
+        );
+
+        const correct =
+            selected !== null &&
+            Number(selected.value) === q.answer;
+
+        if (correct) score++;
+
+        const article =
+            document.getElementById("question-" + (index + 1));
+
+        showFeedback(
+            article,
+            correct,
+            "Correct answer: " +
+            q.options[q.answer] +
+            ". " + q.explanation
+        );
+    });
+
+    sqlQuestions.forEach((q, index) => {
+        const input =
+            document.getElementById("sql-answer-" + index);
+
+        const value = input.value.trim();
+
+        const correct =
+            value !== "" &&
+            Number(value) === q.expected;
+
+        if (correct) score++;
+
+        showFeedback(
+            document.getElementById(
+                "question-" + (index + 14)
+            ),
+            correct,
+            "Expected result: " +
+            q.expected +
+            ". " + q.explanation
+        );
+    });
+
+    document.querySelectorAll(
+        'input[type="radio"], .answer-input'
+    ).forEach(input => {
+        input.disabled = true;
+    });
+
+    document.getElementById("submit-btn").disabled = true;
+
+    const results = document.getElementById("results");
+    results.style.display = "block";
+
+    document.getElementById("score").textContent =
+        score + " / 20";
+
+    document.getElementById("score-message").textContent =
+        score >= 16
+            ? "Excellent result. Review any missed questions."
+            : score >= 12
+                ? "Good progress. Review the explanations."
+                : "Use the feedback to identify topics to revise.";
+
+    results.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+function updateTimer() {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+}
+
+renderTheory();
+renderSQL();
+updateTimer();
+
+document.getElementById("submit-btn")
+    .addEventListener("click", submitPaper);
+
+const timerInterval = setInterval(() => {
+    if (submitted) {
+        clearInterval(timerInterval);
+        return;
+    }
+
+    remainingSeconds--;
+    updateTimer();
+
+    if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        submitPaper();
+    }
+}, 1000);
+</script>
+
+</body>
+</html>
