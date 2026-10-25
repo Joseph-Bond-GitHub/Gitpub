@@ -1,0 +1,2 @@
+Note: This folder is for postgresql. it is used to add in both databases, and a way to code sql, notibly for questions that can be asked via papers.
+This allows us to have our own databases, that can be used in papers.

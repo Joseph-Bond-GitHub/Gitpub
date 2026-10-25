@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gitpub - Database Practice Paper 2</title>
+<style>
+:root{--bg:#111114;--panel:#1b1b20;--border:#36363d;--text:#f4f4f5;--muted:#a1a1aa;--blue:#60a5fa;--green:#4ade80;--red:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 Arial,sans-serif}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:22px}
+.container{max-width:950px;margin:auto;padding:20px}
+h1{margin:0}h2{color:var(--blue)}
+.muted{color:var(--muted)}
+.info{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;background:var(--panel);padding:18px;border:1px solid var(--border);border-radius:9px;margin-bottom:22px}
+#timer{font-size:24px;font-weight:bold;color:var(--blue)}
+.question{background:var(--panel);padding:22px;border:1px solid var(--border);border-radius:9px;margin:18px 0}
+.question h3{margin-top:0;font-size:17px}
+.options{display:grid;gap:9px}
+.option{display:flex;align-items:flex-start;gap:10px;background:#25252b;padding:12px;border:1px solid var(--border);border-radius:7px;cursor:pointer}
+.option:hover{border-color:var(--blue)}
+.option input{accent-color:var(--blue);margin-top:5px}
+.database-link{display:inline-block;margin:8px 0;padding:10px 15px;border-radius:7px;background:#23334b;color:#93c5fd;text-decoration:none;font-weight:bold}
+.database-link:hover{background:#304563}
+.answer{background:#141417;color:white;padding:12px;border:1px solid #52525b;border-radius:7px;font-size:17px;width:240px;max-width:100%}
+button{background:var(--blue);color:#111827;padding:13px 22px;border:none;border-radius:7px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.feedback{background:#25252b;margin-top:13px;padding:12px;border-radius:7px}
+.correct{color:var(--green)}.incorrect{color:var(--red)}
+#results{display:none;border:1px solid var(--blue);background:var(--panel);padding:25px;border-radius:9px;margin:25px 0}
+#score{font-size:34px;color:var(--blue)}
+footer{text-align:center;color:var(--muted);padding:25px}
+@media(max-width:600px){.container{padding:12px}.question{padding:15px}}
+</style>
+</head>
+<body>
+<header><div class="container">
+<h1>Database Practice Paper 2</h1>
+<p class="muted">Databases &amp; Web Programming | Weeks 1-4</p>
+</div></header>
+
+<main class="container">
+<div class="info">
+<div><strong>20 questions</strong><div class="muted">1 mark each</div></div>
+<div><strong>13 Theory + 7 SQL</strong><div class="muted">Auto-marked</div></div>
+<div><strong>Time remaining</strong><div id="timer">30:00</div></div>
+</div>
+
+<p class="muted">For practical questions, open the linked SQL Playground, select the named database, add SQL at the bottom of the script and run it. Enter the requested numeric result here.</p>
+
+<h2>Section A: Theory (13 marks)</h2>
+<div id="theory"></div>
+
+<h2>Section B: Practical SQL (7 marks)</h2>
+<div id="practical"></div>
+
+<button id="submit">Submit and Mark Paper</button>
+<div id="results" aria-live="polite">
+<h2>Your Results</h2>
+<div id="score"></div>
+<p id="message"></p>
+<p>Review your answers and the explanations under each question.</p>
+<button onclick="location.reload()">Try Again</button>
+</div>
+</main>
+<footer>Gitpub - Database Revision</footer>
+
+<script>
+"use strict";
+
+const PLAYGROUND="../../../data/playground.html";
+
+const theory=[
+{
+q:"Which statement about First Normal Form (1NF) is correct?",
+o:["A table must have exactly one column","Each field must hold a single atomic value","All foreign keys must be removed","Every table must contain at least 100 rows"],
+a:1,
+e:"1NF requires atomic column values rather than repeating groups or lists stored in a field."
+},
+{
+q:"Which dependency is an example of a partial dependency?",
+o:["A non-key attribute depends on one part of a composite candidate key","A non-key attribute depends on the entire candidate key","A foreign key references another table","A primary key uniquely identifies a row"],
+a:0,
+e:"A partial dependency is when a non-key attribute depends on only part of a composite candidate key."
+},
+{
+q:"What is the purpose of a FOREIGN KEY constraint?",
+o:["To make a column automatically increment","To enforce a reference to a candidate key in another or the same table","To remove all duplicate rows from a query","To sort rows by their primary key"],
+a:1,
+e:"Foreign keys help enforce referential integrity between related records."
+},
+{
+q:"Which SQL statement changes the structure of an existing table?",
+o:["SELECT","ALTER TABLE","GROUP BY","ORDER BY"],
+a:1,
+e:"ALTER TABLE can add, change or remove supported table attributes and constraints."
+},
+{
+q:"What happens when you use SELECT DISTINCT city FROM customers?",
+o:["All rows are deleted except one","The result includes each distinct city value once","The cities are automatically sorted alphabetically","Only NULL cities are returned"],
+a:1,
+e:"DISTINCT eliminates duplicate result rows. Sorting requires ORDER BY."
+},
+{
+q:"Which command removes all rows from a table while keeping the table definition?",
+o:["DROP TABLE","TRUNCATE TABLE","CREATE VIEW","ALTER DATABASE"],
+a:1,
+e:"TRUNCATE removes table contents without dropping the table itself."
+},
+{
+q:"What is the difference between UNION and UNION ALL?",
+o:["UNION ALL removes duplicates","UNION removes duplicate result rows, while UNION ALL preserves them","UNION can join unrelated column counts","UNION is only valid with three tables"],
+a:1,
+e:"UNION performs duplicate elimination; UNION ALL keeps duplicate result rows."
+},
+{
+q:"Which aggregate function returns the average of non-NULL numeric values?",
+o:["SUM","AVG","MAX","COUNT(*)"],
+a:1,
+e:"AVG calculates the arithmetic mean, excluding NULL input values."
+},
+{
+q:"When using ORDER BY total DESC, what happens?",
+o:["Rows are sorted in descending order by total","Only non-NULL rows are selected","The total column is removed","Rows are grouped by total"],
+a:0,
+e:"DESC means descending order, typically largest to smallest for numbers."
+},
+{
+q:"Which JOIN retains all rows from the right table, including unmatched rows?",
+o:["INNER JOIN","LEFT JOIN","RIGHT JOIN","CROSS JOIN"],
+a:2,
+e:"RIGHT JOIN preserves all right-hand rows and uses NULL for unmatched columns from the left."
+},
+{
+q:"What is the purpose of a prepared SQL statement?",
+o:["To prevent tables from being created","To define SQL that can be executed with parameter values","To turn SQL into HTML","To automatically normalise a database"],
+a:1,
+e:"PREPARE defines a reusable parameterised SQL statement that can be run using EXECUTE."
+},
+{
+q:"Which JPA annotation identifies a Java class as a persistence entity?",
+o:["@Controller","@Entity","@Autowired","@RequestMapping"],
+a:1,
+e:"@Entity marks a class as a JPA-managed entity."
+},
+{
+q:"Which statement about Spring Data JPA repositories is correct?",
+o:["They can provide common persistence operations without hand-writing every SQL query","They replace the relational database","They only work with HTML documents","They cannot retrieve entities by primary key"],
+a:0,
+e:"Spring Data repository interfaces expose common CRUD and query operations."
+}
+];
+
+const practical=[
+{
+db:"books",
+q:"Use MIN(price) to determine the cheapest price in the books table. What is that price in pounds? Enter just the number.",
+a:7.99,
+e:"SELECT MIN(price) FROM books; returns 7.99."
+},
+{
+db:"university",
+q:"Use LEFT JOIN and IS NULL to find students without any enrolment records. How many students have never enrolled in a course?",
+a:2,
+e:"SELECT COUNT(*) FROM students s LEFT JOIN enrolments e ON s.student_id=e.student_id WHERE e.enrolment_id IS NULL; returns 2."
+},
+{
+db:"shop",
+q:"Use COUNT(DISTINCT customer_id) on orders. How many different customers have placed at least one order?",
+a:24,
+e:"SELECT COUNT(DISTINCT customer_id) FROM orders; returns 24."
+},
+{
+db:"cinema",
+q:"Use COUNT(*) on the screenings table to determine how many scheduled screenings there are.",
+a:40,
+e:"SELECT COUNT(*) FROM screenings; returns 40."
+},
+{
+db:"books",
+q:"Use UPDATE to set stock_quantity to 75 for book_id = 1. Query that row afterwards. What is the new stock_quantity?",
+a:75,
+e:"UPDATE books SET stock_quantity=75 WHERE book_id=1; SELECT stock_quantity FROM books WHERE book_id=1; returns 75."
+},
+{
+db:"shop",
+q:"Create a VIEW that groups orders by status and counts them. Query the view to find the number of Cancelled orders.",
+a:4,
+e:"CREATE VIEW status_counts AS SELECT status,COUNT(*) AS total FROM orders GROUP BY status; SELECT total FROM status_counts WHERE status='Cancelled'; returns 4."
+},
+{
+db:"university",
+q:"Use CREATE TABLE to make a temporary practice table, INSERT three rows, then TRUNCATE the table. Run COUNT(*) afterwards. How many rows remain?",
+a:0,
+e:"TRUNCATE clears all rows from the table, leaving a count of 0."
+}
+];
+
+function build(){
+theory.forEach((q,i)=>{
+const box=document.createElement("section");
+box.className="question";box.id="q"+i;
+const h=document.createElement("h3");h.textContent=`Question ${i+1}: ${q.q}`;box.append(h);
+const opts=document.createElement("div");opts.className="options";
+q.o.forEach((value,j)=>{
+const label=document.createElement("label");label.className="option";
+const input=document.createElement("input");
+input.type="radio";input.name="answer"+i;input.value=j;
+const text=document.createElement("span");text.textContent=value;
+label.append(input,text);opts.append(label);
+});
+box.append(opts);document.getElementById("theory").append(box);
+});
+practical.forEach((q,i)=>{
+const box=document.createElement("section");box.className="question";box.id="q"+(i+13);
+const h=document.createElement("h3");h.textContent=`Question ${i+14}: Practical SQL`;
+const p=document.createElement("p");p.textContent=q.q;
+const link=document.createElement("a");
+link.className="database-link";link.href=PLAYGROUND;link.target="_blank";link.rel="noopener noreferrer";
+link.textContent=`Open SQL Playground - select ${q.db} ↗`;
+const note=document.createElement("p");note.className="muted";
+note.textContent=`Use the ${q.db} database. Add your SQL after its existing setup statements.`;
+const label=document.createElement("label");label.textContent="Numerical result: ";label.htmlFor="numeric"+i;
+const input=document.createElement("input");input.className="answer";input.id="numeric"+i;input.type="number";input.step="any";
+box.append(h,p,link,note,label,input);document.getElementById("practical").append(box);
+});
+}
+
+let remaining=1800,submitted=false;
+function feedback(id,ok,explanation){
+const b=document.createElement("div");b.className="feedback";
+const strong=document.createElement("strong");strong.className=ok?"correct":"incorrect";
+strong.textContent=ok?"Correct - 1 mark":"Incorrect - 0 marks";
+const p=document.createElement("p");p.textContent=explanation;b.append(strong,p);
+document.getElementById("q"+id).append(b);
+}
+function submit(){
+if(submitted)return;submitted=true;
+let score=0;
+theory.forEach((q,i)=>{
+const selected=document.querySelector(`input[name="answer${i}"]:checked`);
+const ok=selected!==null&&Number(selected.value)===q.a;
+if(ok)score++;
+feedback(i,ok,`Correct answer: ${q.o[q.a]}. ${q.e}`);
+});
+practical.forEach((q,i)=>{
+const raw=document.getElementById("numeric"+i).value.trim();
+const ok=raw!==""&&Math.abs(Number(raw)-q.a)<0.000001;
+if(ok)score++;
+feedback(i+13,ok,`Expected answer: ${q.a}. ${q.e}`);
+});
+document.querySelectorAll('input').forEach(x=>x.disabled=true);
+document.getElementById("submit").disabled=true;
+document.getElementById("score").textContent=`${score} / 20`;
+document.getElementById("message").textContent=score>=16?"Excellent work!":score>=12?"Good progress. Review your missed questions.":"Review the explanations and try again.";
+document.getElementById("results").style.display="block";
+document.getElementById("results").scrollIntoView({behavior:"smooth"});
+}
+function clock(){
+document.getElementById("timer").textContent=
+String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0");
+}
+build();clock();
+document.getElementById("submit").addEventListener("click",submit);
+const interval=setInterval(()=>{
+if(submitted){clearInterval(interval);return;}
+remaining--;clock();
+if(remaining<=0){clearInterval(interval);submit();}
+},1000);
+</script>
+</body>
+</html>
