@@ -32,13 +32,21 @@ const DATABASES = [
         label: 'Books',
         path: './stored_databases/books.sql'
     },
-
-    // Example:
-    // {
-    //     id: 'university',
-    //     label: 'University',
-    //     path: './stored_databases/university.sql'
-    // }
+    {
+        id: 'university',
+        label: 'University',
+        path: './stored_databases/university.sql'
+    },
+    {
+        id: 'shop',
+        label: 'Shop',
+        path: './stored_databases/shop.sql'
+    },
+    {
+        id: 'cinema',
+        label: 'Cinema',
+        path: './stored_databases/cinema.sql'
+    }
 ];
 
 

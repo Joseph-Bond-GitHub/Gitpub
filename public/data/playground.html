@@ -9,15 +9,19 @@
 
     <title>Gitpub SQL Playground</title>
 
+    <!-- CodeMirror editor -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.css">
+
     <style>
         :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --editor: #020617;
-            --border: #334155;
-            --text: #f1f5f9;
-            --muted: #94a3b8;
-            --primary: #38bdf8;
+            --bg: #111114;
+            --panel: #1b1b20;
+            --editor: #18181b;
+            --border: #36363d;
+            --text: #f4f4f5;
+            --muted: #a1a1aa;
+            --primary: #60a5fa;
             --success: #4ade80;
             --error: #f87171;
         }
@@ -30,14 +34,14 @@
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             line-height: 1.5;
         }
 
         header {
+            padding: 22px 30px;
             background: var(--panel);
             border-bottom: 1px solid var(--border);
-            padding: 20px 30px;
         }
 
         header h1 {
@@ -46,14 +50,14 @@
         }
 
         header p {
-            margin: 6px 0 0;
+            margin: 5px 0 0;
             color: var(--muted);
         }
 
         main {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
-            padding: 25px;
+            padding: 24px;
         }
 
         .panel {
@@ -64,11 +68,23 @@
             margin-bottom: 20px;
         }
 
-        .toolbar {
+        .toolbar,
+        .actions,
+        .editor-header {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        .editor-header {
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .editor-header h2 {
+            margin: 0;
+            font-size: 19px;
         }
 
         label {
@@ -81,60 +97,145 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             padding: 10px;
-            min-width: 180px;
+            min-width: 200px;
         }
 
-        .editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .editor-header h2 {
-            margin: 0;
-            font-size: 20px;
-        }
-
+        .information,
         .hint {
             color: var(--muted);
             font-size: 13px;
         }
 
+        .information {
+            margin-bottom: 0;
+        }
+
+        /* --------------------------------
+           SQL EDITOR
+        -------------------------------- */
+
+        .CodeMirror {
+            height: 540px;
+            background: var(--editor);
+            color: #f4f4f5;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .CodeMirror-scroll {
+            min-height: 300px;
+        }
+
+        .CodeMirror-lines {
+            padding: 14px 0;
+        }
+
+        .CodeMirror pre.CodeMirror-line,
+        .CodeMirror pre.CodeMirror-line-like {
+            padding-left: 10px;
+        }
+
+        .CodeMirror-gutters {
+            background: #151518;
+            border-right: 1px solid var(--border);
+        }
+
+        .CodeMirror-linenumber {
+            color: #71717a;
+        }
+
+        .CodeMirror-cursor {
+            border-left: 2px solid white;
+        }
+
+        .CodeMirror-selected {
+            background: #334155 !important;
+        }
+
+        .CodeMirror-focused .CodeMirror-selected {
+            background: #334155 !important;
+        }
+
+        .CodeMirror-activeline-background {
+            background: #24242a;
+        }
+
+        .CodeMirror-matchingbracket {
+            color: #facc15 !important;
+            outline: 1px solid #71717a;
+        }
+
+        /* SQL syntax colours */
+
+        .cm-s-default .cm-keyword {
+            color: #60a5fa;
+        }
+
+        .cm-s-default .cm-operator {
+            color: #e2e8f0;
+        }
+
+        .cm-s-default .cm-string,
+        .cm-s-default .cm-string-2 {
+            color: #4ade80;
+        }
+
+        .cm-s-default .cm-number {
+            color: #f4f4f5;
+        }
+
+        .cm-s-default .cm-comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .cm-s-default .cm-variable,
+        .cm-s-default .cm-variable-2,
+        .cm-s-default .cm-def,
+        .cm-s-default .cm-property {
+            color: #f4f4f5;
+        }
+
+        .cm-s-default .cm-builtin,
+        .cm-s-default .cm-atom,
+        .cm-s-default .cm-type {
+            color: #93c5fd;
+        }
+
+        .cm-s-default .cm-error {
+            color: #f87171;
+        }
+
+        /* Fallback textarea if CodeMirror fails */
+
         #sql-editor {
             display: block;
             width: 100%;
-            min-height: 450px;
-            padding: 20px;
-            resize: vertical;
-
+            min-height: 540px;
+            padding: 15px;
             background: var(--editor);
-            color: #e2e8f0;
-
+            color: var(--text);
             border: 1px solid var(--border);
             border-radius: 8px;
-
             font-family: Consolas, Monaco, monospace;
             font-size: 14px;
             line-height: 1.6;
-            tab-size: 4;
+            resize: vertical;
         }
 
-        #sql-editor:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 1px;
-        }
+        /* --------------------------------
+           BUTTONS
+        -------------------------------- */
 
         .actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 15px;
+            margin-top: 16px;
         }
 
         button {
-            padding: 11px 20px;
+            padding: 11px 19px;
             border: none;
             border-radius: 6px;
             font-size: 14px;
@@ -144,16 +245,16 @@
 
         #run-sql {
             background: var(--primary);
-            color: #082f49;
+            color: #111827;
         }
 
         #restore-sql {
-            background: #475569;
+            background: #3f3f46;
             color: white;
         }
 
         button:hover:not(:disabled) {
-            filter: brightness(1.1);
+            filter: brightness(1.12);
         }
 
         button:disabled {
@@ -167,13 +268,17 @@
             font-size: 14px;
         }
 
+        /* --------------------------------
+           OUTPUT
+        -------------------------------- */
+
         #sql-output {
             background: var(--editor);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
             min-height: 120px;
-            max-height: 600px;
+            max-height: 650px;
             overflow: auto;
             font-family: Consolas, Monaco, monospace;
             font-size: 13px;
@@ -190,19 +295,20 @@
             text-align: left;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid var(--border);
-            padding: 10px 12px;
+            padding: 9px 12px;
             white-space: nowrap;
         }
 
         th {
-            background: #243449;
+            background: #27272a;
             color: var(--primary);
         }
 
         tr:nth-child(even) {
-            background: #172033;
+            background: #202024;
         }
 
         .sql-error {
@@ -214,11 +320,6 @@
             color: var(--success);
         }
 
-        .information {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
         footer {
             text-align: center;
             padding: 20px;
@@ -227,26 +328,23 @@
         }
 
         @media (max-width: 600px) {
-            main {
-                padding: 12px;
-            }
-
             header {
                 padding: 18px;
+            }
+
+            main {
+                padding: 12px;
             }
 
             .panel {
                 padding: 14px;
             }
 
+            .CodeMirror,
             #sql-editor {
-                min-height: 350px;
-                padding: 12px;
-            }
-
-            .editor-header {
-                align-items: flex-start;
-                flex-direction: column;
+                height: 430px;
+                min-height: 430px;
+                font-size: 12px;
             }
         }
     </style>
@@ -257,13 +355,14 @@
 <header>
     <h1>Gitpub SQL Playground</h1>
     <p>
-        Practise PostgreSQL queries directly in your browser.
+        Write, edit and execute PostgreSQL scripts
+        directly in your browser.
     </p>
 </header>
 
 <main>
 
-    <!-- DATABASE SELECTOR -->
+    <!-- Database selector -->
 
     <section class="panel">
 
@@ -274,20 +373,18 @@
             </label>
 
             <select id="database-select">
-                <!-- setup.js adds databases here -->
             </select>
 
         </div>
 
         <p class="information">
-            Choose a database to load its complete SQL script.
-            Changes made here will not affect the original file.
+            Select a database to load its entire SQL script.
+            Any changes you make are temporary.
         </p>
 
     </section>
 
-
-    <!-- SQL EDITOR -->
+    <!-- SQL editor -->
 
     <section class="panel">
 
@@ -296,14 +393,10 @@
             <h2>SQL Editor</h2>
 
             <span class="hint">
-                Edit the script or add queries at the bottom.
+                PostgreSQL · Syntax highlighting enabled
             </span>
 
         </div>
-
-        <label for="sql-editor" class="hint">
-            PostgreSQL script
-        </label>
 
         <textarea
             id="sql-editor"
@@ -311,7 +404,7 @@
             autocomplete="off"
             autocapitalize="off"
             aria-label="SQL code editor"
-            placeholder="Select a database to load SQL..."
+            placeholder="Loading SQL database..."
         ></textarea>
 
         <div class="actions">
@@ -326,41 +419,149 @@
 
         </div>
 
-        <p id="sql-status" role="status" aria-live="polite">
-            Waiting for database...
+        <p id="sql-status"
+           role="status"
+           aria-live="polite">
+            Preparing SQL playground...
         </p>
 
     </section>
 
-
-    <!-- OUTPUT -->
+    <!-- Query output -->
 
     <section class="panel">
 
         <div class="editor-header">
+
             <h2>SQL Output</h2>
+
             <span class="hint">
-                Results and errors appear below.
+                Query results, affected rows and errors
             </span>
+
         </div>
 
-        <div id="sql-output" aria-label="SQL execution output">
+        <div id="sql-output"
+             aria-label="SQL execution output">
+
             <p class="information">
-                Press Run to execute the SQL script.
+                Press Run to execute your SQL script.
             </p>
+
         </div>
 
     </section>
 
 </main>
 
-
 <footer>
-    Gitpub — Databases & Web Programming Revision
+    Gitpub — Databases &amp; Web Programming
 </footer>
 
 
-<!-- PostgreSQL playground JavaScript -->
+<!-- CodeMirror libraries -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/mode/sql/sql.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/edit/matchbrackets.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/selection/active-line.js">
+</script>
+
+
+<!-- Initialise syntax-highlighted editor -->
+
+<script>
+    (function () {
+        "use strict";
+
+        const textarea = document.getElementById("sql-editor");
+
+        if (!window.CodeMirror) {
+            console.warn(
+                "CodeMirror could not be loaded. " +
+                "Using the standard SQL textarea."
+            );
+            return;
+        }
+
+        const sqlEditor = CodeMirror.fromTextArea(textarea, {
+            mode: "text/x-pgsql",
+            lineNumbers: true,
+            lineWrapping: false,
+            matchBrackets: true,
+            styleActiveLine: true,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            autofocus: false,
+            extraKeys: {
+                Tab: function (cm) {
+                    cm.replaceSelection(
+                        "    ",
+                        "end",
+                        "+input"
+                    );
+                },
+
+                "Ctrl-Enter": function () {
+                    document.getElementById("run-sql").click();
+                },
+
+                "Cmd-Enter": function () {
+                    document.getElementById("run-sql").click();
+                }
+            }
+        });
+
+        /*
+         * Compatibility with the existing setup.js.
+         *
+         * setup.js reads and writes textarea.value.
+         * CodeMirror has its own document, so this
+         * bridge keeps the two interfaces connected.
+         *
+         * This means setup.js does not need editing.
+         */
+
+        Object.defineProperty(textarea, "value", {
+            configurable: true,
+            enumerable: true,
+
+            get: function () {
+                return sqlEditor.getValue();
+            },
+
+            set: function (newValue) {
+                const text = String(newValue ?? "");
+
+                if (sqlEditor.getValue() !== text) {
+                    sqlEditor.setValue(text);
+                    sqlEditor.scrollTo(0, 0);
+                }
+            }
+        });
+
+        window.gitpubSqlEditor = sqlEditor;
+
+        console.log(
+            "Gitpub SQL editor initialised."
+        );
+    })();
+</script>
+
+
+<!-- Existing SQL execution engine -->
+
 <script type="module" src="./setup.js"></script>
 
 </body>
