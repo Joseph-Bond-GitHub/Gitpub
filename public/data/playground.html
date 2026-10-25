@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Gitpub SQL Playground</title>
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --editor: #020617;
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --primary: #38bdf8;
+            --success: #4ade80;
+            --error: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select {
+            background: var(--editor);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            min-width: 180px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .editor-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        #sql-editor {
+            display: block;
+            width: 100%;
+            min-height: 450px;
+            padding: 20px;
+            resize: vertical;
+
+            background: var(--editor);
+            color: #e2e8f0;
+
+            border: 1px solid var(--border);
+            border-radius: 8px;
+
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            tab-size: 4;
+        }
+
+        #sql-editor:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 1px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 11px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #run-sql {
+            background: var(--primary);
+            color: #082f49;
+        }
+
+        #restore-sql {
+            background: #475569;
+            color: white;
+        }
+
+        button:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #sql-status {
+            margin-top: 15px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        #sql-output {
+            background: var(--editor);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 120px;
+            max-height: 600px;
+            overflow: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+        }
+
+        .sql-table-scroll {
+            overflow-x: auto;
+            margin: 15px 0 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #243449;
+            color: var(--primary);
+        }
+
+        tr:nth-child(even) {
+            background: #172033;
+        }
+
+        .sql-error {
+            color: var(--error);
+            white-space: pre-wrap;
+        }
+
+        .sql-success {
+            color: var(--success);
+        }
+
+        .information {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 12px;
+            }
+
+            header {
+                padding: 18px;
+            }
+
+            .panel {
+                padding: 14px;
+            }
+
+            #sql-editor {
+                min-height: 350px;
+                padding: 12px;
+            }
+
+            .editor-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Gitpub SQL Playground</h1>
+    <p>
+        Practise PostgreSQL queries directly in your browser.
+    </p>
+</header>
+
+<main>
+
+    <!-- DATABASE SELECTOR -->
+
+    <section class="panel">
+
+        <div class="toolbar">
+
+            <label for="database-select">
+                Select database:
+            </label>
+
+            <select id="database-select">
+                <!-- setup.js adds databases here -->
+            </select>
+
+        </div>
+
+        <p class="information">
+            Choose a database to load its complete SQL script.
+            Changes made here will not affect the original file.
+        </p>
+
+    </section>
+
+
+    <!-- SQL EDITOR -->
+
+    <section class="panel">
+
+        <div class="editor-header">
+
+            <h2>SQL Editor</h2>
+
+            <span class="hint">
+                Edit the script or add queries at the bottom.
+            </span>
+
+        </div>
+
+        <label for="sql-editor" class="hint">
+            PostgreSQL script
+        </label>
+
+        <textarea
+            id="sql-editor"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            aria-label="SQL code editor"
+            placeholder="Select a database to load SQL..."
+        ></textarea>
+
+        <div class="actions">
+
+            <button id="run-sql" type="button">
+                ▶ Run entire SQL script
+            </button>
+
+            <button id="restore-sql" type="button">
+                ↺ Restore original script
+            </button>
+
+        </div>
+
+        <p id="sql-status" role="status" aria-live="polite">
+            Waiting for database...
+        </p>
+
+    </section>
+
+
+    <!-- OUTPUT -->
+
+    <section class="panel">
+
+        <div class="editor-header">
+            <h2>SQL Output</h2>
+            <span class="hint">
+                Results and errors appear below.
+            </span>
+        </div>
+
+        <div id="sql-output" aria-label="SQL execution output">
+            <p class="information">
+                Press Run to execute the SQL script.
+            </p>
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+    Gitpub — Databases & Web Programming Revision
+</footer>
+
+
+<!-- PostgreSQL playground JavaScript -->
+<script type="module" src="./setup.js"></script>
+
+</body>
+</html>
